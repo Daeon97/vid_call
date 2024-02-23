@@ -5,14 +5,24 @@ abstract interface class VideoCallRepository {
     String appId,
   );
 
+  // Don't forget to unbind
   Future<void> setupLocalVideo();
+
+  Future<void> enableVideo();
+
+  Future<void> disableVideo();
 
   Future<void> startPreview();
 
-// Future<void> enableVideo();
+// Future<void> enableLocalVideo();
 //
-// Future<void> disableVideo();
+// Future<void> streamLocalVideo();
+//
+// Future<void> streamRemoteVideo();
 }
+
+/* TODO(Daeon97): Modify this implementation to pass calls to a
+    util class that can catch and handle errors thrown from Agora */
 
 final class VideoCallRepositoryImplementation implements VideoCallRepository {
   const VideoCallRepositoryImplementation(
@@ -39,13 +49,29 @@ final class VideoCallRepositoryImplementation implements VideoCallRepository {
       );
 
   @override
+  Future<void> enableVideo() => _videoCallService.enableVideo();
+
+  @override
+  Future<void> disableVideo() => _videoCallService.disableVideo();
+
+  @override
   Future<void> startPreview() => _videoCallService.startPreview(
         sourceType: VideoSourceType.videoSourceCameraPrimary,
       );
 
-// @override
-// Future<void> enableVideo() => _videoCallService.enableVideo();
-//
-// @override
-// Future<void> disableVideo() => _videoCallService.disableVideo();
+  @override
+  Future<void> enableLocalVideo() => _videoCallService.enableLocalVideo(
+    true,
+  );
+
+  @override
+  Future<void> streamLocalVideo() => _videoCallService.muteLocalVideoStream(
+    false,
+  );
+
+  @override
+  Future<void> streamRemoteVideo() =>
+      _videoCallService.muteAllRemoteVideoStreams(
+        false,
+      );
 }
