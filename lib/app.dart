@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:vid_call/resources/colors.dart' show baseColor;
-import 'package:vid_call/resources/strings/routes.dart'
-    show videoCallScreenRoute;
-import 'package:vid_call/screens/home_screen.dart';
-import 'package:vid_call/screens/video_call_screen.dart';
+import 'resources/colors.dart' show baseColor;
+import 'resources/strings/routes.dart' show videoCallScreenRoute;
+import 'views/screens/home_screen.dart';
+import 'views/screens/video_call_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});

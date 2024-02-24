@@ -1,11 +1,21 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import '../../utils/enums.dart';
+import '../utils/enums.dart' show Role;
 
-abstract interface class VideoCallRepository {
+abstract interface class VideoOpsRepository
+    with
+        _LocalVideoOpsRepository,
+        _ChannelOpsRepository,
+        _RemoteVideoOpsRepository {
   Future<void> initialize(
     String appId,
   );
 
+  Future<void> enableVideo();
+
+  Future<void> disableVideo();
+}
+
+abstract mixin class _LocalVideoOpsRepository {
   /* TODO(Daeon97): Check out [VideoViewSetupMode] of [VideoCanvas]
       later */
   Future<void> bindLocalVideoToView({
@@ -21,20 +31,16 @@ abstract interface class VideoCallRepository {
 
   Future<void> disableLocalVideo();
 
-  Future<void> startLocalVideoStream();
+  Future<void> muteLocalVideoStream();
 
-  Future<void> stopLocalVideoStream();
-
-  // Future<void> streamRemoteVideo();
-
-  Future<void> enableVideo();
-
-  Future<void> disableVideo();
+  Future<void> unMuteLocalVideoStream();
 
   Future<void> startPreview();
 
   Future<void> stopPreview();
+}
 
+abstract mixin class _ChannelOpsRepository {
   /* TODO(Daeon97): Publishing screen capture is not supported,
       autoSubscribeAudio and autoSubscribeVideo is set to true */
   Future<void> joinChannel({
@@ -49,21 +55,34 @@ abstract interface class VideoCallRepository {
   Future<void> leaveChannel();
 }
 
+abstract mixin class _RemoteVideoOpsRepository {
+  Future<void> muteRemoteVideoStream(
+    int userId,
+  );
+
+  Future<void> unMuteRemoteVideoStream(
+    int userId,
+  );
+
+  Future<void> muteAllRemoteVideoStreams();
+
+  Future<void> unMuteAllRemoteVideoStreams();
+}
+
 /* TODO(Daeon97): Modify this implementation to pass calls to a
     util class that can catch and handle errors thrown from Agora */
+final class VideoOpsRepositoryImplementation implements VideoOpsRepository {
+  const VideoOpsRepositoryImplementation(
+    RtcEngine rtcService,
+  ) : _rtcService = rtcService;
 
-final class VideoCallRepositoryImplementation implements VideoCallRepository {
-  const VideoCallRepositoryImplementation(
-    RtcEngine videoCallService,
-  ) : _videoCallService = videoCallService;
-
-  final RtcEngine _videoCallService;
+  final RtcEngine _rtcService;
 
   @override
   Future<void> initialize(
     String appId,
   ) =>
-      _videoCallService.initialize(
+      _rtcService.initialize(
         RtcEngineContext(
           appId: appId,
           channelProfile: ChannelProfileType.channelProfileCloudGaming,
@@ -75,7 +94,7 @@ final class VideoCallRepositoryImplementation implements VideoCallRepository {
     required int viewId,
     required int userId,
   }) =>
-      _videoCallService.setupLocalVideo(
+      _rtcService.setupLocalVideo(
         VideoCanvas(
           view: viewId,
           uid: userId,
@@ -87,7 +106,7 @@ final class VideoCallRepositoryImplementation implements VideoCallRepository {
   Future<void> unbindLocalVideoFromView(
     int userId,
   ) =>
-      _videoCallService.setupLocalVideo(
+      _rtcService.setupLocalVideo(
         VideoCanvas(
           view: null,
           uid: userId,
@@ -95,45 +114,38 @@ final class VideoCallRepositoryImplementation implements VideoCallRepository {
       );
 
   @override
-  Future<void> enableLocalVideo() => _videoCallService.enableLocalVideo(
+  Future<void> enableLocalVideo() => _rtcService.enableLocalVideo(
         true,
       );
 
   @override
-  Future<void> disableLocalVideo() => _videoCallService.enableLocalVideo(
+  Future<void> disableLocalVideo() => _rtcService.enableLocalVideo(
         false,
       );
 
   @override
-  Future<void> startLocalVideoStream() =>
-      _videoCallService.muteLocalVideoStream(
-        false,
-      );
-
-  @override
-  Future<void> stopLocalVideoStream() => _videoCallService.muteLocalVideoStream(
+  Future<void> muteLocalVideoStream() => _rtcService.muteLocalVideoStream(
         true,
       );
 
-  // @override
-  // Future<void> streamRemoteVideo() =>
-  //     _videoCallService.muteAllRemoteVideoStreams(
-  //       false,
-  //     );
+  @override
+  Future<void> unMuteLocalVideoStream() => _rtcService.muteLocalVideoStream(
+        false,
+      );
 
   @override
-  Future<void> enableVideo() => _videoCallService.enableVideo();
+  Future<void> enableVideo() => _rtcService.enableVideo();
 
   @override
-  Future<void> disableVideo() => _videoCallService.disableVideo();
+  Future<void> disableVideo() => _rtcService.disableVideo();
 
   @override
-  Future<void> startPreview() => _videoCallService.startPreview(
+  Future<void> startPreview() => _rtcService.startPreview(
         sourceType: VideoSourceType.videoSourceCameraPrimary,
       );
 
   @override
-  Future<void> stopPreview() => _videoCallService.stopPreview(
+  Future<void> stopPreview() => _rtcService.stopPreview(
         sourceType: VideoSourceType.videoSourceCameraPrimary,
       );
 
@@ -146,7 +158,7 @@ final class VideoCallRepositoryImplementation implements VideoCallRepository {
     required bool publishMicrophoneFeed,
     required Role role,
   }) =>
-      _videoCallService.joinChannel(
+      _rtcService.joinChannel(
         token: token,
         channelId: channelId,
         uid: userId,
@@ -165,11 +177,41 @@ final class VideoCallRepositoryImplementation implements VideoCallRepository {
       );
 
   @override
-  Future<void> leaveChannel() => _videoCallService.leaveChannel(
+  Future<void> leaveChannel() => _rtcService.leaveChannel(
         options: const LeaveChannelOptions(
           stopAudioMixing: true,
           stopMicrophoneRecording: true,
           stopAllEffect: true,
         ),
+      );
+
+  @override
+  Future<void> muteRemoteVideoStream(
+    int userId,
+  ) =>
+      _rtcService.muteRemoteVideoStream(
+        uid: userId,
+        mute: true,
+      );
+
+  @override
+  Future<void> unMuteRemoteVideoStream(
+    int userId,
+  ) =>
+      _rtcService.muteRemoteVideoStream(
+        uid: userId,
+        mute: false,
+      );
+
+  @override
+  Future<void> muteAllRemoteVideoStreams() =>
+      _rtcService.muteAllRemoteVideoStreams(
+        true,
+      );
+
+  @override
+  Future<void> unMuteAllRemoteVideoStreams() =>
+      _rtcService.muteAllRemoteVideoStreams(
+        false,
       );
 }

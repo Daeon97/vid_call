@@ -16,10 +16,10 @@ abstract base class _PermissionHandlerRepository {
 }
 
 abstract final class CameraPermissionHandlerRepository
-    extends _PermissionHandlerRepository {}
+    implements _PermissionHandlerRepository {}
 
 abstract final class MicrophonePermissionHandlerRepository
-    extends _PermissionHandlerRepository {}
+    implements _PermissionHandlerRepository {}
 
 final class CameraPermissionHandlerRepositoryImplementation
     implements CameraPermissionHandlerRepository {
