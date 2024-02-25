@@ -1,0 +1,1 @@
+const theOperationFailed = 'The operation failed';

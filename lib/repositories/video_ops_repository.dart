@@ -1,4 +1,7 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:dartz/dartz.dart';
+import '../utils/clients/rtc_operation_handler.dart';
+import '../models/failure.dart';
 import '../utils/enums.dart' show Role;
 
 abstract interface class VideoOpsRepository
@@ -6,44 +9,44 @@ abstract interface class VideoOpsRepository
         _LocalVideoOpsRepository,
         _ChannelOpsRepository,
         _RemoteVideoOpsRepository {
-  Future<void> initialize(
+  Future<Either<Failure, void>> initialize(
     String appId,
   );
 
-  Future<void> enableVideo();
+  Future<Either<Failure, void>> enableVideo();
 
-  Future<void> disableVideo();
+  Future<Either<Failure, void>> disableVideo();
 }
 
 abstract mixin class _LocalVideoOpsRepository {
   /* TODO(Daeon97): Check out [VideoViewSetupMode] of [VideoCanvas]
       later */
-  Future<void> bindLocalVideoToView({
+  Future<Either<Failure, void>> bindLocalVideoToView({
     required int viewId,
     required int userId,
   });
 
-  Future<void> unbindLocalVideoFromView(
+  Future<Either<Failure, void>> unbindLocalVideoFromView(
     int userId,
   );
 
-  Future<void> enableLocalVideo();
+  Future<Either<Failure, void>> enableLocalVideo();
 
-  Future<void> disableLocalVideo();
+  Future<Either<Failure, void>> disableLocalVideo();
 
-  Future<void> muteLocalVideoStream();
+  Future<Either<Failure, void>> muteLocalVideoStream();
 
-  Future<void> unMuteLocalVideoStream();
+  Future<Either<Failure, void>> unMuteLocalVideoStream();
 
-  Future<void> startPreview();
+  Future<Either<Failure, void>> startPreview();
 
-  Future<void> stopPreview();
+  Future<Either<Failure, void>> stopPreview();
 }
 
 abstract mixin class _ChannelOpsRepository {
   /* TODO(Daeon97): Publishing screen capture is not supported,
       autoSubscribeAudio and autoSubscribeVideo is set to true */
-  Future<void> joinChannel({
+  Future<Either<Failure, void>> joinChannel({
     required String token,
     required String channelId,
     required int userId,
@@ -52,26 +55,29 @@ abstract mixin class _ChannelOpsRepository {
     required Role role,
   });
 
-  Future<void> leaveChannel();
+  Future<Either<Failure, void>> leaveChannel();
 }
 
 abstract mixin class _RemoteVideoOpsRepository {
-  Future<void> muteRemoteVideoStream(
+  Future<Either<Failure, void>> muteRemoteVideoStream(
     int userId,
   );
 
-  Future<void> unMuteRemoteVideoStream(
+  Future<Either<Failure, void>> unMuteRemoteVideoStream(
     int userId,
   );
 
-  Future<void> muteAllRemoteVideoStreams();
+  Future<Either<Failure, void>> muteAllRemoteVideoStreams();
 
-  Future<void> unMuteAllRemoteVideoStreams();
+  Future<Either<Failure, void>> unMuteAllRemoteVideoStreams();
 }
 
 /* TODO(Daeon97): Modify this implementation to pass calls to a
-    util class that can catch and handle errors thrown from Agora */
-final class VideoOpsRepositoryImplementation implements VideoOpsRepository {
+    util class that can catch and handle errors thrown from Agora
+    and return an Either<L, R> */
+final class VideoOpsRepositoryImplementation
+    with RtcOperationHandler
+    implements VideoOpsRepository {
   const VideoOpsRepositoryImplementation(
     RtcEngine rtcService,
   ) : _rtcService = rtcService;
@@ -79,78 +85,119 @@ final class VideoOpsRepositoryImplementation implements VideoOpsRepository {
   final RtcEngine _rtcService;
 
   @override
-  Future<void> initialize(
+  Future<Either<Failure, void>> initialize(
     String appId,
   ) =>
-      _rtcService.initialize(
-        RtcEngineContext(
-          appId: appId,
-          channelProfile: ChannelProfileType.channelProfileCloudGaming,
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.initialize(
+          RtcEngineContext(
+            appId: appId,
+            channelProfile: ChannelProfileType.channelProfileCloudGaming,
+          ),
         ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> bindLocalVideoToView({
+  Future<Either<Failure, void>> bindLocalVideoToView({
     required int viewId,
     required int userId,
   }) =>
-      _rtcService.setupLocalVideo(
-        VideoCanvas(
-          view: viewId,
-          uid: userId,
-          sourceType: VideoSourceType.videoSourceCameraPrimary,
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.setupLocalVideo(
+          VideoCanvas(
+            view: viewId,
+            uid: userId,
+            sourceType: VideoSourceType.videoSourceCameraPrimary,
+          ),
         ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> unbindLocalVideoFromView(
+  Future<Either<Failure, void>> unbindLocalVideoFromView(
     int userId,
   ) =>
-      _rtcService.setupLocalVideo(
-        VideoCanvas(
-          view: null,
-          uid: userId,
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.setupLocalVideo(
+          VideoCanvas(
+            view: null,
+            uid: userId,
+          ),
         ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> enableLocalVideo() => _rtcService.enableLocalVideo(
-        true,
+  Future<Either<Failure, void>> enableLocalVideo() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.enableLocalVideo(
+          true,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> disableLocalVideo() => _rtcService.enableLocalVideo(
-        false,
+  Future<Either<Failure, void>> disableLocalVideo() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.enableLocalVideo(
+          false,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> muteLocalVideoStream() => _rtcService.muteLocalVideoStream(
-        true,
+  Future<Either<Failure, void>> muteLocalVideoStream() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.muteLocalVideoStream(
+          true,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> unMuteLocalVideoStream() => _rtcService.muteLocalVideoStream(
-        false,
+  Future<Either<Failure, void>> unMuteLocalVideoStream() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.muteLocalVideoStream(
+          false,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> enableVideo() => _rtcService.enableVideo();
-
-  @override
-  Future<void> disableVideo() => _rtcService.disableVideo();
-
-  @override
-  Future<void> startPreview() => _rtcService.startPreview(
-        sourceType: VideoSourceType.videoSourceCameraPrimary,
+  Future<Either<Failure, void>> enableVideo() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.enableVideo(),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> stopPreview() => _rtcService.stopPreview(
-        sourceType: VideoSourceType.videoSourceCameraPrimary,
+  Future<Either<Failure, void>> disableVideo() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.disableVideo(),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> joinChannel({
+  Future<Either<Failure, void>> startPreview() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.startPreview(
+          sourceType: VideoSourceType.videoSourceCameraPrimary,
+        ),
+        failureHandler: Failure.new,
+      );
+
+  @override
+  Future<Either<Failure, void>> stopPreview() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.stopPreview(
+          sourceType: VideoSourceType.videoSourceCameraPrimary,
+        ),
+        failureHandler: Failure.new,
+      );
+
+  @override
+  Future<Either<Failure, void>> joinChannel({
     required String token,
     required String channelId,
     required int userId,
@@ -158,60 +205,79 @@ final class VideoOpsRepositoryImplementation implements VideoOpsRepository {
     required bool publishMicrophoneFeed,
     required Role role,
   }) =>
-      _rtcService.joinChannel(
-        token: token,
-        channelId: channelId,
-        uid: userId,
-        options: ChannelMediaOptions(
-          publishCameraTrack: publishCameraFeed,
-          publishMicrophoneTrack: publishMicrophoneFeed,
-          enableAudioRecordingOrPlayout: publishMicrophoneFeed,
-          autoSubscribeAudio: true,
-          autoSubscribeVideo: true,
-          channelProfile: ChannelProfileType.channelProfileCloudGaming,
-          clientRoleType: switch (role) {
-            Role.host => ClientRoleType.clientRoleBroadcaster,
-            Role.audience => ClientRoleType.clientRoleAudience,
-          },
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.joinChannel(
+          token: token,
+          channelId: channelId,
+          uid: userId,
+          options: ChannelMediaOptions(
+            publishCameraTrack: publishCameraFeed,
+            publishMicrophoneTrack: publishMicrophoneFeed,
+            enableAudioRecordingOrPlayout: publishMicrophoneFeed,
+            autoSubscribeAudio: true,
+            autoSubscribeVideo: true,
+            channelProfile: ChannelProfileType.channelProfileCloudGaming,
+            clientRoleType: switch (role) {
+              Role.host => ClientRoleType.clientRoleBroadcaster,
+              Role.audience => ClientRoleType.clientRoleAudience,
+            },
+          ),
         ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> leaveChannel() => _rtcService.leaveChannel(
-        options: const LeaveChannelOptions(
-          stopAudioMixing: true,
-          stopMicrophoneRecording: true,
-          stopAllEffect: true,
+  Future<Either<Failure, void>> leaveChannel() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.leaveChannel(
+          options: const LeaveChannelOptions(
+            stopAudioMixing: true,
+            stopMicrophoneRecording: true,
+            stopAllEffect: true,
+          ),
         ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> muteRemoteVideoStream(
+  Future<Either<Failure, void>> muteRemoteVideoStream(
     int userId,
   ) =>
-      _rtcService.muteRemoteVideoStream(
-        uid: userId,
-        mute: true,
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.muteRemoteVideoStream(
+          uid: userId,
+          mute: true,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> unMuteRemoteVideoStream(
+  Future<Either<Failure, void>> unMuteRemoteVideoStream(
     int userId,
   ) =>
-      _rtcService.muteRemoteVideoStream(
-        uid: userId,
-        mute: false,
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.muteRemoteVideoStream(
+          uid: userId,
+          mute: false,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> muteAllRemoteVideoStreams() =>
-      _rtcService.muteAllRemoteVideoStreams(
-        true,
+  Future<Either<Failure, void>> muteAllRemoteVideoStreams() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.muteAllRemoteVideoStreams(
+          true,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
-  Future<void> unMuteAllRemoteVideoStreams() =>
-      _rtcService.muteAllRemoteVideoStreams(
-        false,
+  Future<Either<Failure, void>> unMuteAllRemoteVideoStreams() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.muteAllRemoteVideoStreams(
+          false,
+        ),
+        failureHandler: Failure.new,
       );
 }
