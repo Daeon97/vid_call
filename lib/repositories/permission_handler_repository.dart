@@ -1,16 +1,12 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:permission_handler/permission_handler.dart';
-import '../utils/enums.dart' as enums show PermissionStatus;
+import 'package:vid_call/utils/enums.dart' as enums show PermissionStatus;
 
 abstract interface class _PermissionHandlerRepository {
-  Future<enums.PermissionStatus> get status;
-
   Future<void> requestPermission();
 
-  Future<bool> get permissionGranted;
-
-  Future<bool> get permissionDenied;
-
-  Future<bool> get permissionPermanentlyDenied;
+  Future<enums.PermissionStatus> get status;
 
 // Future<void> openSettings() => openAppSettings();
 }
@@ -24,49 +20,33 @@ abstract interface class MicrophonePermissionHandlerRepository
 final class CameraPermissionHandlerRepositoryImplementation
     implements CameraPermissionHandlerRepository {
   @override
+  Future<void> requestPermission() => Permission.camera.request();
+
+  @override
   Future<enums.PermissionStatus> get status async =>
       switch (await Permission.camera.status) {
         PermissionStatus.granted ||
         PermissionStatus.limited =>
           enums.PermissionStatus.granted,
+        PermissionStatus.permanentlyDenied =>
+          enums.PermissionStatus.permanentlyDenied,
         _ => enums.PermissionStatus.notGranted,
       };
-
-  @override
-  Future<void> requestPermission() => Permission.camera.request();
-
-  @override
-  Future<bool> get permissionGranted => Permission.camera.isGranted;
-
-  @override
-  Future<bool> get permissionDenied => Permission.camera.isDenied;
-
-  @override
-  Future<bool> get permissionPermanentlyDenied =>
-      Permission.camera.isPermanentlyDenied;
 }
 
 final class MicrophonePermissionHandlerRepositoryImplementation
     implements MicrophonePermissionHandlerRepository {
+  @override
+  Future<void> requestPermission() => Permission.microphone.request();
+
   @override
   Future<enums.PermissionStatus> get status async =>
       switch (await Permission.microphone.status) {
         PermissionStatus.granted ||
         PermissionStatus.limited =>
           enums.PermissionStatus.granted,
+        PermissionStatus.permanentlyDenied =>
+          enums.PermissionStatus.permanentlyDenied,
         _ => enums.PermissionStatus.notGranted,
       };
-
-  @override
-  Future<void> requestPermission() => Permission.microphone.request();
-
-  @override
-  Future<bool> get permissionGranted => Permission.microphone.isGranted;
-
-  @override
-  Future<bool> get permissionDenied => Permission.microphone.isDenied;
-
-  @override
-  Future<bool> get permissionPermanentlyDenied =>
-      Permission.microphone.isPermanentlyDenied;
 }

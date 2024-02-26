@@ -1,7 +1,9 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:dartz/dartz.dart';
-import '../models/failure.dart';
-import '../utils/clients/rtc_operation_handler.dart';
+import 'package:vid_call/models/failure.dart';
+import 'package:vid_call/utils/clients/rtc_operation_handler.dart';
 
 abstract interface class AudioOpsRepository
     with _LocalAudioOpsRepository, _RemoteAudioOpsRepository {
@@ -84,14 +86,14 @@ final class AudioOpsRepositoryImplementation
   @override
   Future<Either<Failure, void>> enableAudio() =>
       handleRtcOperation<Failure, void>(
-        rtcOperationInitiator: () => _rtcService.enableAudio(),
+        rtcOperationInitiator: _rtcService.enableAudio,
         failureHandler: Failure.new,
       );
 
   @override
   Future<Either<Failure, void>> disableAudio() =>
       handleRtcOperation<Failure, void>(
-        rtcOperationInitiator: () => _rtcService.disableAudio(),
+        rtcOperationInitiator: _rtcService.disableAudio,
         failureHandler: Failure.new,
       );
 

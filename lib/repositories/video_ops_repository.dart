@@ -1,8 +1,10 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:dartz/dartz.dart';
-import '../utils/clients/rtc_operation_handler.dart';
-import '../models/failure.dart';
-import '../utils/enums.dart' show Role;
+import 'package:vid_call/models/failure.dart';
+import 'package:vid_call/utils/clients/rtc_operation_handler.dart';
+import 'package:vid_call/utils/enums.dart' show Role;
 
 abstract interface class VideoOpsRepository
     with
@@ -121,7 +123,6 @@ final class VideoOpsRepositoryImplementation
       handleRtcOperation<Failure, void>(
         rtcOperationInitiator: () => _rtcService.setupLocalVideo(
           VideoCanvas(
-            view: null,
             uid: userId,
           ),
         ),
@@ -167,32 +168,28 @@ final class VideoOpsRepositoryImplementation
   @override
   Future<Either<Failure, void>> enableVideo() =>
       handleRtcOperation<Failure, void>(
-        rtcOperationInitiator: () => _rtcService.enableVideo(),
+        rtcOperationInitiator: _rtcService.enableVideo,
         failureHandler: Failure.new,
       );
 
   @override
   Future<Either<Failure, void>> disableVideo() =>
       handleRtcOperation<Failure, void>(
-        rtcOperationInitiator: () => _rtcService.disableVideo(),
+        rtcOperationInitiator: _rtcService.disableVideo,
         failureHandler: Failure.new,
       );
 
   @override
   Future<Either<Failure, void>> startPreview() =>
       handleRtcOperation<Failure, void>(
-        rtcOperationInitiator: () => _rtcService.startPreview(
-          sourceType: VideoSourceType.videoSourceCameraPrimary,
-        ),
+        rtcOperationInitiator: _rtcService.startPreview,
         failureHandler: Failure.new,
       );
 
   @override
   Future<Either<Failure, void>> stopPreview() =>
       handleRtcOperation<Failure, void>(
-        rtcOperationInitiator: () => _rtcService.stopPreview(
-          sourceType: VideoSourceType.videoSourceCameraPrimary,
-        ),
+        rtcOperationInitiator: _rtcService.stopPreview,
         failureHandler: Failure.new,
       );
 
