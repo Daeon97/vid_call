@@ -6,11 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vid_call/cubits/permission/camera_permission_handler_cubit/camera_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/microphone_permission_handler_cubit.dart';
+import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart';
 import 'package:vid_call/resources/colors.dart' show cameraPreviewSurfaceColor;
 import 'package:vid_call/resources/numbers/constants.dart'
     show oneDotFive, sixteenDotNil, twoDotNil;
 import 'package:vid_call/resources/numbers/dimensions.dart'
     show largeSpacing, smallSpacing, spacing;
+import 'package:vid_call/resources/strings/ui.dart'
+    show join, request, settings;
 import 'package:vid_call/views/widgets/alert_snack_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -41,46 +44,27 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<void> get _cameraPermission =>
+      context.read<CameraPermissionHandlerCubit>().cameraPermission;
+
+  Future<void> get _microphonePermission =>
+      context.read<MicrophonePermissionHandlerCubit>().microphonePermission;
+
+  Future<void> _openAppSettings() =>
+      context.read<OpenPermissionSettingsCubit>().openAppSettings();
+
   @override
-  Widget build(BuildContext context) => MultiBlocListener(
-        listeners: [
-          BlocListener<CameraPermissionHandlerCubit,
-              CameraPermissionHandlerState>(
-            listener: (_, cameraPermissionHandlerState) {
-              if (cameraPermissionHandlerState
-                  is CameraPermissionNotGrantedState) {
-                AlertSnackBar.show(
-                  context,
-                  message: cameraPermissionHandlerState.failure.message,
-                );
-              } else if (cameraPermissionHandlerState
-                  is CameraPermissionPermanentlyDeniedState) {
-                AlertSnackBar.show(
-                  context,
-                  message: cameraPermissionHandlerState.failure.message,
-                );
-              }
-            },
-          ),
-          BlocListener<MicrophonePermissionHandlerCubit,
-              MicrophonePermissionHandlerState>(
-            listener: (_, microphonePermissionHandlerState) {
-              if (microphonePermissionHandlerState
-                  is MicrophonePermissionNotGrantedState) {
-                AlertSnackBar.show(
-                  context,
-                  message: microphonePermissionHandlerState.failure.message,
-                );
-              } else if (microphonePermissionHandlerState
-                  is MicrophonePermissionPermanentlyDeniedState) {
-                AlertSnackBar.show(
-                  context,
-                  message: microphonePermissionHandlerState.failure.message,
-                );
-              }
-            },
-          ),
-        ],
+  Widget build(BuildContext context) =>
+      BlocListener<OpenPermissionSettingsCubit, OpenPermissionSettingsState>(
+        listener: (_, openPermissionSettingsState) {
+          if (openPermissionSettingsState
+              is CouldNotOpenPermissionSettingsState) {
+            AlertSnackBar.show(
+              context,
+              message: openPermissionSettingsState.failure.message,
+            );
+          }
+        },
         child: Scaffold(
           body: Center(
             child: SingleChildScrollView(
@@ -115,9 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             CameraPermissionNotGrantedState(
                               failure: final _,
                             ) =>
-                              () => context
-                                  .read<CameraPermissionHandlerCubit>()
-                                  .cameraPermission,
+                              () => _cameraPermission,
                             _ => null,
                           },
                           style: const ButtonStyle(
@@ -152,9 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             MicrophonePermissionNotGrantedState(
                               failure: final _,
                             ) =>
-                              () => context
-                                  .read<MicrophonePermissionHandlerCubit>()
-                                  .microphonePermission,
+                              () => _microphonePermission,
                             _ => null,
                           },
                           style: const ButtonStyle(
@@ -175,6 +155,23 @@ class _HomeScreenState extends State<HomeScreen> {
                               _ => FontAwesomeIcons.microphoneSlash,
                             },
                           ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: spacing,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: const ButtonStyle(
+                          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                            EdgeInsetsDirectional.symmetric(
+                              vertical: spacing,
+                              horizontal: largeSpacing + spacing,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          join,
                         ),
                       ),
                     ],
@@ -210,6 +207,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                               ),
                             ),
+                            TextButton(
+                              onPressed: () => _cameraPermission,
+                              child: const Text(
+                                request,
+                              ),
+                            ),
                           ],
                         ),
                       CameraPermissionPermanentlyDeniedState(
@@ -234,6 +237,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color:
                                           Theme.of(context).colorScheme.error,
                                     ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _openAppSettings,
+                              child: const Text(
+                                settings,
                               ),
                             ),
                           ],
@@ -269,6 +278,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                               ),
                             ),
+                            TextButton(
+                              onPressed: () => _microphonePermission,
+                              child: const Text(
+                                request,
+                              ),
+                            ),
                           ],
                         ),
                       MicrophonePermissionPermanentlyDeniedState(
@@ -293,6 +308,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color:
                                           Theme.of(context).colorScheme.error,
                                     ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: _openAppSettings,
+                              child: const Text(
+                                settings,
                               ),
                             ),
                           ],

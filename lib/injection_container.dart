@@ -6,6 +6,8 @@ import 'package:vid_call/cubits/permission/camera_permission_handler_cubit/camer
     show CameraPermissionHandlerCubit;
 import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/microphone_permission_handler_cubit.dart'
     show MicrophonePermissionHandlerCubit;
+import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart'
+    show OpenPermissionSettingsCubit;
 import 'package:vid_call/repositories/audio_ops_repository.dart';
 import 'package:vid_call/repositories/permission_handler_repository.dart';
 import 'package:vid_call/repositories/video_ops_repository.dart';
@@ -14,7 +16,7 @@ final sl = GetIt.I;
 
 void registerServices() {
   sl
-    // View models
+    // Cubits
     ..registerFactory<CameraPermissionHandlerCubit>(
       () => CameraPermissionHandlerCubit(
         sl(),
@@ -22,6 +24,11 @@ void registerServices() {
     )
     ..registerFactory<MicrophonePermissionHandlerCubit>(
       () => MicrophonePermissionHandlerCubit(
+        sl(),
+      ),
+    )
+    ..registerFactory<OpenPermissionSettingsCubit>(
+      () => OpenPermissionSettingsCubit(
         sl(),
       ),
     )
@@ -36,6 +43,9 @@ void registerServices() {
       () => AudioOpsRepositoryImplementation(
         sl(),
       ),
+    )
+    ..registerLazySingleton<PermissionHandlerSettingsRepository>(
+      PermissionHandlerSettingsRepositoryImplementation.new,
     )
     ..registerLazySingleton<CameraPermissionHandlerRepository>(
       CameraPermissionHandlerRepositoryImplementation.new,

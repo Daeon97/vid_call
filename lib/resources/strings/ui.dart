@@ -9,3 +9,7 @@ const microphonePermissionIsRequiredToEnableAudio =
     'Microphone permission is required to enable audio';
 const microphonePermissionPermanentlyDenied =
     'Microphone permission was permanently denied. Please enable it in settings';
+const request = 'Request';
+const settings = 'Settings';
+const weCouldNotOpenAppSettings = 'We could not open app settings';
+const join = 'Join';

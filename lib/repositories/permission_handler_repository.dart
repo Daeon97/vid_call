@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, one_member_abstracts
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vid_call/utils/enums.dart' as enums show PermissionStatus;
@@ -7,8 +7,10 @@ abstract interface class _PermissionHandlerRepository {
   Future<void> requestPermission();
 
   Future<enums.PermissionStatus> get status;
+}
 
-// Future<void> openSettings() => openAppSettings();
+abstract interface class PermissionHandlerSettingsRepository {
+  Future<bool> openSettings();
 }
 
 abstract interface class CameraPermissionHandlerRepository
@@ -16,6 +18,12 @@ abstract interface class CameraPermissionHandlerRepository
 
 abstract interface class MicrophonePermissionHandlerRepository
     implements _PermissionHandlerRepository {}
+
+final class PermissionHandlerSettingsRepositoryImplementation
+    implements PermissionHandlerSettingsRepository {
+  @override
+  Future<bool> openSettings() => openAppSettings();
+}
 
 final class CameraPermissionHandlerRepositoryImplementation
     implements CameraPermissionHandlerRepository {
