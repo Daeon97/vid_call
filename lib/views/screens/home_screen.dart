@@ -1,15 +1,15 @@
 // ignore_for_file: public_member_api_docs
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vid_call/cubits/permission/camera_permission_handler_cubit/camera_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/microphone_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart';
+import 'package:vid_call/cubits/real_time_communication/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart';
 import 'package:vid_call/resources/colors.dart' show cameraPreviewSurfaceColor;
 import 'package:vid_call/resources/numbers/constants.dart'
-    show oneDotFive, sixteenDotNil, twoDotNil;
+    show oneDotFive, oneDotNil, sixteenDotNil, twoDotNil;
 import 'package:vid_call/resources/numbers/dimensions.dart'
     show largeSpacing, smallSpacing, spacing;
 import 'package:vid_call/resources/strings/ui.dart'
@@ -54,17 +54,47 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<OpenPermissionSettingsCubit>().openAppSettings();
 
   @override
-  Widget build(BuildContext context) =>
-      BlocListener<OpenPermissionSettingsCubit, OpenPermissionSettingsState>(
-        listener: (_, openPermissionSettingsState) {
-          if (openPermissionSettingsState
-              is CouldNotOpenPermissionSettingsState) {
-            AlertSnackBar.show(
-              context,
-              message: openPermissionSettingsState.failure.message,
-            );
-          }
-        },
+  Widget build(BuildContext context) => MultiBlocListener(
+        listeners: [
+          BlocListener<OpenPermissionSettingsCubit,
+              OpenPermissionSettingsState>(
+            listener: (_, openPermissionSettingsState) {
+              if (openPermissionSettingsState
+                  is FailedToOpenPermissionSettingsState) {
+                AlertSnackBar.show(
+                  context,
+                  message: openPermissionSettingsState.failure.message,
+                );
+              }
+            },
+          ),
+          BlocListener<InitializeRealTimeCommunicationCubit,
+              InitializeRealTimeCommunicationState>(
+            listener: (_, initializeRealTimeCommunicationState) {
+              if (initializeRealTimeCommunicationState
+                  is InitializedRealTimeCommunicationState) {
+                // do necessary stuff here
+              } else if (initializeRealTimeCommunicationState
+                  is FailedToInitializeRealTimeCommunicationState) {
+                AlertSnackBar.show(
+                  context,
+                  message: initializeRealTimeCommunicationState.failure.message,
+                );
+              }
+            },
+          ),
+          BlocListener<CameraPermissionHandlerCubit,
+              CameraPermissionHandlerState>(
+            listener: (_, cameraPermissionHandlerState) {
+              if (cameraPermissionHandlerState
+                  is CameraPermissionGrantedState) {
+                // context
+                //     .read<InitializeRealTimeCommunicationCubit>()
+                //     .initializeRealTimeCommunication();
+              }
+            },
+          ),
+        ],
         child: Scaffold(
           body: Center(
             child: SingleChildScrollView(
@@ -82,6 +112,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         sixteenDotNil,
                       ),
                     ),
+                    // child: BlocBuilder<InitializeRealTimeCommunicationCubit,
+                    //     InitializeRealTimeCommunicationState>(
+                    //   builder: (_, initializeRealTimeCommunicationState) =>
+                    //       switch (initializeRealTimeCommunicationState) {
+                    //     InitializedRealTimeCommunicationState(
+                    //       agoraVideoView: final agoraVideoView,
+                    //     ) =>
+                    //       Center(
+                    //         child: agoraVideoView,
+                    //       ),
+                    //     _ => Center(
+                    //         child: SizedBox(
+                    //           height: oneDotNil,
+                    //           width: MediaQuery.of(context).size.width /
+                    //               oneDotFive,
+                    //           child: const LinearProgressIndicator(),
+                    //         ),
+                    //       ),
+                    //   },
+                    // ),
                   ),
                   const SizedBox(
                     height: spacing,
@@ -325,14 +375,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          //   AgoraVideoView(
-          //     controller: VideoViewController(
-          //         rtcEngine: // Pass in the engine instance created on initState,
-          //         canvas: VideoCanvas(),
-          //     useFlutterTexture: true,
-          //     useAndroidSurfaceView: true,
-          //   ),
-          // ),
         ),
       );
 }

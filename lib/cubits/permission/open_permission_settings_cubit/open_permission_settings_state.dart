@@ -28,9 +28,9 @@ final class OpenedPermissionSettingsState extends OpenPermissionSettingsState {
   List<Object?> get props => [];
 }
 
-final class CouldNotOpenPermissionSettingsState
+final class FailedToOpenPermissionSettingsState
     extends OpenPermissionSettingsState {
-  const CouldNotOpenPermissionSettingsState(
+  const FailedToOpenPermissionSettingsState(
     this.failure,
   );
 

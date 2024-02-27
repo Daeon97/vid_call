@@ -34,7 +34,7 @@ final class OpenPermissionSettingsCubit
     emit(
       switch (openSettingsResult) {
         true => const OpenedPermissionSettingsState(),
-        false => const CouldNotOpenPermissionSettingsState(
+        false => const FailedToOpenPermissionSettingsState(
             Failure(
               weCouldNotOpenAppSettings,
             ),

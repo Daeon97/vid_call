@@ -5,6 +5,8 @@ import 'package:dartz/dartz.dart';
 import 'package:vid_call/models/failure.dart';
 import 'package:vid_call/utils/clients/rtc_operation_handler.dart';
 import 'package:vid_call/utils/enums.dart' show Role;
+import 'package:vid_call/utils/type_definitions.dart'
+    show OnVideoViewCreatedCallback;
 
 abstract interface class VideoOpsRepository
     with
@@ -14,6 +16,13 @@ abstract interface class VideoOpsRepository
   Future<Either<Failure, void>> initialize(
     String appId,
   );
+
+  AgoraVideoView createVideoView(
+    RtcEngine rtcEngine, {
+    required int viewId,
+    required int userId,
+    required OnVideoViewCreatedCallback onVideoViewCreated,
+  });
 
   Future<Either<Failure, void>> enableVideo();
 
@@ -98,6 +107,27 @@ final class VideoOpsRepositoryImplementation
           ),
         ),
         failureHandler: Failure.new,
+      );
+
+  @override
+  AgoraVideoView createVideoView(
+    RtcEngine rtcEngine, {
+    required int viewId,
+    required int userId,
+    required OnVideoViewCreatedCallback onVideoViewCreated,
+  }) =>
+      AgoraVideoView(
+        controller: VideoViewController(
+          rtcEngine: rtcEngine,
+          canvas: VideoCanvas(
+            view: viewId,
+            uid: userId,
+            sourceType: VideoSourceType.videoSourceCameraPrimary,
+          ),
+          useFlutterTexture: true,
+          useAndroidSurfaceView: true,
+        ),
+        onAgoraVideoViewCreated: onVideoViewCreated,
       );
 
   @override
