@@ -13,3 +13,4 @@ const request = 'Request';
 const settings = 'Settings';
 const weCouldNotOpenAppSettings = 'We could not open app settings';
 const join = 'Join';
+const cameraIsDisabled = 'Camera is disabled';

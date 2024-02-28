@@ -11,12 +11,13 @@ import 'package:vid_call/cubits/real_time_communication/initialize_real_time_com
 import 'package:vid_call/cubits/real_time_communication/toggle_audio_cubit/toggle_audio_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/toggle_preview_cubit/toggle_preview_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/toggle_video_cubit/toggle_video_cubit.dart';
+import 'package:vid_call/resources/colors.dart' show cameraPreviewSurfaceColor;
 import 'package:vid_call/resources/numbers/constants.dart'
     show oneDotFive, oneDotNil, sixteenDotNil, twoDotNil;
 import 'package:vid_call/resources/numbers/dimensions.dart'
     show largeSpacing, smallSpacing, spacing;
 import 'package:vid_call/resources/strings/ui.dart'
-    show join, request, settings;
+    show cameraIsDisabled, join, request, settings;
 import 'package:vid_call/views/widgets/alert_snack_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -119,13 +120,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: MediaQuery.of(context).size.width / oneDotFive,
                       decoration: BoxDecoration(
                         border: Border.all(),
+                        color: switch ((toggleVideoState is ToggledVideoState &&
+                                toggleVideoState.to) ||
+                            (toggleVideoState is FailedToToggleVideoState &&
+                                !toggleVideoState.to)) {
+                          true => null,
+                          false => cameraPreviewSurfaceColor,
+                        },
                       ),
-                      child: switch ((toggleVideoState is ToggledVideoState &&
-                              toggleVideoState.to) ||
-                          (toggleVideoState is FailedToToggleVideoState &&
-                              !toggleVideoState.to)) {
-                        false => Center(
-                            child: BlocBuilder<CreateVideoViewCubit,
+                      child: Center(
+                        child: switch ((toggleVideoState is ToggledVideoState &&
+                                toggleVideoState.to) ||
+                            (toggleVideoState is FailedToToggleVideoState &&
+                                !toggleVideoState.to)) {
+                          true => BlocBuilder<CreateVideoViewCubit,
                                 CreateVideoViewState>(
                               builder: (_, createVideoViewState) =>
                                   switch (createVideoViewState) {
@@ -136,9 +144,35 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _ => const CircularProgressIndicator(),
                               },
                             ),
-                          ),
-                        true => null,
-                      },
+                          false => Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.videoSlash,
+                                  size: Theme.of(context)
+                                      .textTheme
+                                      .headlineLarge
+                                      ?.fontSize,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                ),
+                                const SizedBox(
+                                  height: smallSpacing,
+                                ),
+                                Text(
+                                  cameraIsDisabled,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                      ),
+                                ),
+                              ],
+                            ),
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(
