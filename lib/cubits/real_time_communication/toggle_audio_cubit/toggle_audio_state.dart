@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, avoid_positional_boolean_parameters
 
 part of 'toggle_audio_cubit.dart';
 
@@ -14,28 +14,43 @@ final class ToggleAudioInitialState extends ToggleAudioState {
 }
 
 final class TogglingAudioState extends ToggleAudioState {
-  const TogglingAudioState();
+  const TogglingAudioState(
+    this.to,
+  );
+
+  final bool to;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        to,
+      ];
 }
 
 final class ToggledAudioState extends ToggleAudioState {
-  const ToggledAudioState();
+  const ToggledAudioState(
+    this.to,
+  );
+
+  final bool to;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        to,
+      ];
 }
 
 final class FailedToToggleAudioState extends ToggleAudioState {
-  const FailedToToggleAudioState(
-    this.failure,
-  );
+  const FailedToToggleAudioState({
+    required this.to,
+    required this.failure,
+  });
 
+  final bool to;
   final Failure failure;
 
   @override
   List<Object?> get props => [
+        to,
         failure,
       ];
 }

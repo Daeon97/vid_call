@@ -19,36 +19,47 @@ final class ToggleVideoCubit extends Cubit<ToggleVideoState> {
   final VideoOpsRepository _videoOpsRepository;
 
   Future<void> toggleVideo({
-    required bool enable,
+    required bool to,
   }) async {
     emit(
-      const TogglingVideoState(),
+      TogglingVideoState(
+        to,
+      ),
     );
 
-    final toggleVideoResult = await switch (enable) {
+    final toggleVideoResult = await switch (to) {
       true => _videoOpsRepository.enableVideo(),
       false => _videoOpsRepository.disableVideo(),
     };
 
     toggleVideoResult.fold(
-      _failure,
-      _success,
+      (failure) => _failure(
+        to: to,
+        failure: failure,
+      ),
+      (_) => _success(
+        to,
+      ),
     );
   }
 
-  void _failure(
-    Failure failure,
-  ) =>
+  void _failure({
+    required bool to,
+    required Failure failure,
+  }) =>
       emit(
         FailedToToggleVideoState(
-          failure,
+          to: to,
+          failure: failure,
         ),
       );
 
   void _success(
-    void _,
+    bool to,
   ) =>
       emit(
-        const ToggledVideoState(),
+        ToggledVideoState(
+          to,
+        ),
       );
 }

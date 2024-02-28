@@ -6,8 +6,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vid_call/cubits/permission/camera_permission_handler_cubit/camera_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/microphone_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart';
+import 'package:vid_call/cubits/real_time_communication/create_video_view_cubit/create_video_view_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart';
-import 'package:vid_call/resources/colors.dart' show cameraPreviewSurfaceColor;
+import 'package:vid_call/cubits/real_time_communication/toggle_audio_cubit/toggle_audio_cubit.dart';
+import 'package:vid_call/cubits/real_time_communication/toggle_preview_cubit/toggle_preview_cubit.dart';
+import 'package:vid_call/cubits/real_time_communication/toggle_video_cubit/toggle_video_cubit.dart';
 import 'package:vid_call/resources/numbers/constants.dart'
     show oneDotFive, oneDotNil, sixteenDotNil, twoDotNil;
 import 'package:vid_call/resources/numbers/dimensions.dart'
@@ -44,12 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> get _cameraPermission =>
-      context.read<CameraPermissionHandlerCubit>().cameraPermission;
-
-  Future<void> get _microphonePermission =>
-      context.read<MicrophonePermissionHandlerCubit>().microphonePermission;
-
   Future<void> _openAppSettings() =>
       context.read<OpenPermissionSettingsCubit>().openAppSettings();
 
@@ -68,12 +65,27 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
           ),
+          BlocListener<CameraPermissionHandlerCubit,
+              CameraPermissionHandlerState>(
+            listener: (_, cameraPermissionHandlerState) {
+              if (cameraPermissionHandlerState
+                  is CameraPermissionGrantedState) {
+                context
+                    .read<InitializeRealTimeCommunicationCubit>()
+                    .initializeRealTimeCommunication();
+              }
+            },
+          ),
           BlocListener<InitializeRealTimeCommunicationCubit,
               InitializeRealTimeCommunicationState>(
             listener: (_, initializeRealTimeCommunicationState) {
               if (initializeRealTimeCommunicationState
                   is InitializedRealTimeCommunicationState) {
-                // do necessary stuff here
+                context.read<CreateVideoViewCubit>().createVideoView(
+                      viewId: 0,
+                      userId: 0,
+                      onVideoViewCreated: (viewId) {},
+                    );
               } else if (initializeRealTimeCommunicationState
                   is FailedToInitializeRealTimeCommunicationState) {
                 AlertSnackBar.show(
@@ -83,16 +95,14 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
           ),
-          BlocListener<CameraPermissionHandlerCubit,
-              CameraPermissionHandlerState>(
-            listener: (_, cameraPermissionHandlerState) {
-              if (cameraPermissionHandlerState
-                  is CameraPermissionGrantedState) {
-                // context
-                //     .read<InitializeRealTimeCommunicationCubit>()
-                //     .initializeRealTimeCommunication();
-              }
-            },
+          BlocListener<ToggleVideoCubit, ToggleVideoState>(
+            listener: (_, toggleVideoState) =>
+                context.read<TogglePreviewCubit>().togglePreview(
+                      to: (toggleVideoState is ToggledVideoState &&
+                              toggleVideoState.to) ||
+                          (toggleVideoState is FailedToToggleVideoState &&
+                              !toggleVideoState.to),
+                    ),
           ),
         ],
         child: Scaffold(
@@ -103,35 +113,33 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Column(
                 children: [
-                  Container(
-                    height: MediaQuery.of(context).size.height / twoDotNil,
-                    width: MediaQuery.of(context).size.width / oneDotFive,
-                    decoration: BoxDecoration(
-                      color: cameraPreviewSurfaceColor,
-                      borderRadius: BorderRadiusDirectional.circular(
-                        sixteenDotNil,
+                  BlocBuilder<ToggleVideoCubit, ToggleVideoState>(
+                    builder: (_, toggleVideoState) => Container(
+                      height: MediaQuery.of(context).size.height / twoDotNil,
+                      width: MediaQuery.of(context).size.width / oneDotFive,
+                      decoration: BoxDecoration(
+                        border: Border.all(),
                       ),
+                      child: switch ((toggleVideoState is ToggledVideoState &&
+                              toggleVideoState.to) ||
+                          (toggleVideoState is FailedToToggleVideoState &&
+                              !toggleVideoState.to)) {
+                        false => Center(
+                            child: BlocBuilder<CreateVideoViewCubit,
+                                CreateVideoViewState>(
+                              builder: (_, createVideoViewState) =>
+                                  switch (createVideoViewState) {
+                                CreatedVideoViewState(
+                                  agoraVideoView: final agoraVideoView,
+                                ) =>
+                                  agoraVideoView,
+                                _ => const CircularProgressIndicator(),
+                              },
+                            ),
+                          ),
+                        true => null,
+                      },
                     ),
-                    // child: BlocBuilder<InitializeRealTimeCommunicationCubit,
-                    //     InitializeRealTimeCommunicationState>(
-                    //   builder: (_, initializeRealTimeCommunicationState) =>
-                    //       switch (initializeRealTimeCommunicationState) {
-                    //     InitializedRealTimeCommunicationState(
-                    //       agoraVideoView: final agoraVideoView,
-                    //     ) =>
-                    //       Center(
-                    //         child: agoraVideoView,
-                    //       ),
-                    //     _ => Center(
-                    //         child: SizedBox(
-                    //           height: oneDotNil,
-                    //           width: MediaQuery.of(context).size.width /
-                    //               oneDotFive,
-                    //           child: const LinearProgressIndicator(),
-                    //         ),
-                    //       ),
-                    //   },
-                    // ),
                   ),
                   const SizedBox(
                     height: spacing,
@@ -143,32 +151,56 @@ class _HomeScreenState extends State<HomeScreen> {
                       BlocBuilder<CameraPermissionHandlerCubit,
                           CameraPermissionHandlerState>(
                         builder: (_, cameraPermissionHandlerState) =>
-                            ElevatedButton(
-                          onPressed: switch (cameraPermissionHandlerState) {
-                            CameraPermissionGrantedState() => () {},
-                            CameraPermissionNotGrantedState(
-                              failure: final _,
-                            ) =>
-                              () => _cameraPermission,
-                            _ => null,
-                          },
-                          style: const ButtonStyle(
-                            shape: MaterialStatePropertyAll<OutlinedBorder>(
-                              CircleBorder(),
-                            ),
-                            padding:
-                                MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                              EdgeInsetsDirectional.all(
-                                spacing,
+                            BlocBuilder<ToggleVideoCubit, ToggleVideoState>(
+                          builder: (_, toggleVideoState) => ElevatedButton(
+                            onPressed: switch (cameraPermissionHandlerState) {
+                              CameraPermissionGrantedState()
+                                  when toggleVideoState
+                                          is ToggleVideoInitialState ||
+                                      toggleVideoState is ToggledVideoState ||
+                                      toggleVideoState
+                                          is FailedToToggleVideoState =>
+                                () => context
+                                    .read<ToggleVideoCubit>()
+                                    .toggleVideo(
+                                      to: toggleVideoState
+                                              is ToggleVideoInitialState ||
+                                          (toggleVideoState
+                                                  is ToggledVideoState &&
+                                              !toggleVideoState.to) ||
+                                          (toggleVideoState
+                                                  is FailedToToggleVideoState &&
+                                              toggleVideoState.to),
+                                    ),
+                              _ => null,
+                            },
+                            style: const ButtonStyle(
+                              shape: MaterialStatePropertyAll<OutlinedBorder>(
+                                CircleBorder(),
+                              ),
+                              padding:
+                                  MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                                EdgeInsetsDirectional.all(
+                                  spacing,
+                                ),
                               ),
                             ),
-                          ),
-                          child: FaIcon(
-                            switch (cameraPermissionHandlerState) {
-                              CameraPermissionGrantedState() =>
-                                FontAwesomeIcons.video,
-                              _ => FontAwesomeIcons.videoSlash,
-                            },
+                            child: FaIcon(
+                              switch (toggleVideoState) {
+                                ToggledVideoState(
+                                  to: final to,
+                                )
+                                    when to =>
+                                  FontAwesomeIcons.video,
+                                FailedToToggleVideoState(
+                                  to: final to,
+                                  failure: _,
+                                )
+                                    when !to =>
+                                  FontAwesomeIcons.video,
+                                _ => FontAwesomeIcons.videoSlash,
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -178,32 +210,57 @@ class _HomeScreenState extends State<HomeScreen> {
                       BlocBuilder<MicrophonePermissionHandlerCubit,
                           MicrophonePermissionHandlerState>(
                         builder: (_, microphonePermissionHandlerState) =>
-                            ElevatedButton(
-                          onPressed: switch (microphonePermissionHandlerState) {
-                            MicrophonePermissionGrantedState() => () {},
-                            MicrophonePermissionNotGrantedState(
-                              failure: final _,
-                            ) =>
-                              () => _microphonePermission,
-                            _ => null,
-                          },
-                          style: const ButtonStyle(
-                            shape: MaterialStatePropertyAll<OutlinedBorder>(
-                              CircleBorder(),
-                            ),
-                            padding:
-                                MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                              EdgeInsetsDirectional.all(
-                                spacing,
+                            BlocBuilder<ToggleAudioCubit, ToggleAudioState>(
+                          builder: (_, toggleAudioState) => ElevatedButton(
+                            onPressed: switch (
+                                microphonePermissionHandlerState) {
+                              MicrophonePermissionGrantedState()
+                                  when toggleAudioState
+                                          is ToggleAudioInitialState ||
+                                      toggleAudioState is ToggledAudioState ||
+                                      toggleAudioState
+                                          is FailedToToggleAudioState =>
+                                () => context
+                                    .read<ToggleAudioCubit>()
+                                    .toggleAudio(
+                                      to: toggleAudioState
+                                              is ToggleAudioInitialState ||
+                                          (toggleAudioState
+                                                  is ToggledAudioState &&
+                                              !toggleAudioState.to) ||
+                                          (toggleAudioState
+                                                  is FailedToToggleAudioState &&
+                                              toggleAudioState.to),
+                                    ),
+                              _ => null,
+                            },
+                            style: const ButtonStyle(
+                              shape: MaterialStatePropertyAll<OutlinedBorder>(
+                                CircleBorder(),
+                              ),
+                              padding:
+                                  MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                                EdgeInsetsDirectional.all(
+                                  spacing,
+                                ),
                               ),
                             ),
-                          ),
-                          child: FaIcon(
-                            switch (microphonePermissionHandlerState) {
-                              MicrophonePermissionGrantedState() =>
-                                FontAwesomeIcons.microphone,
-                              _ => FontAwesomeIcons.microphoneSlash,
-                            },
+                            child: FaIcon(
+                              switch (toggleAudioState) {
+                                ToggledAudioState(
+                                  to: final to,
+                                )
+                                    when to =>
+                                  FontAwesomeIcons.microphone,
+                                FailedToToggleAudioState(
+                                  to: final to,
+                                  failure: _,
+                                )
+                                    when !to =>
+                                  FontAwesomeIcons.microphone,
+                                _ => FontAwesomeIcons.microphoneSlash,
+                              },
+                            ),
                           ),
                         ),
                       ),
@@ -258,7 +315,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             TextButton(
-                              onPressed: () => _cameraPermission,
+                              onPressed: () => context
+                                  .read<CameraPermissionHandlerCubit>()
+                                  .cameraPermission,
                               child: const Text(
                                 request,
                               ),
@@ -329,7 +388,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             TextButton(
-                              onPressed: () => _microphonePermission,
+                              onPressed: () => context
+                                  .read<MicrophonePermissionHandlerCubit>()
+                                  .microphonePermission,
                               child: const Text(
                                 request,
                               ),

@@ -19,36 +19,47 @@ final class TogglePreviewCubit extends Cubit<TogglePreviewState> {
   final VideoOpsRepository _videoOpsRepository;
 
   Future<void> togglePreview({
-    required bool enable,
+    required bool to,
   }) async {
     emit(
-      const TogglingPreviewState(),
+      TogglingPreviewState(
+        to,
+      ),
     );
 
-    final togglePreviewResult = await switch (enable) {
+    final togglePreviewResult = await switch (to) {
       true => _videoOpsRepository.startPreview(),
       false => _videoOpsRepository.stopPreview(),
     };
 
     togglePreviewResult.fold(
-      _failure,
-      _success,
+      (failure) => _failure(
+        to: to,
+        failure: failure,
+      ),
+      (_) => _success(
+        to,
+      ),
     );
   }
 
-  void _failure(
-    Failure failure,
-  ) =>
+  void _failure({
+    required bool to,
+    required Failure failure,
+  }) =>
       emit(
         FailedToTogglePreviewState(
-          failure,
+          to: to,
+          failure: failure,
         ),
       );
 
   void _success(
-    void _,
+    bool to,
   ) =>
       emit(
-        const ToggledPreviewState(),
+        ToggledPreviewState(
+          to,
+        ),
       );
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, avoid_positional_boolean_parameters
 
 part of 'toggle_video_cubit.dart';
 
@@ -14,28 +14,43 @@ final class ToggleVideoInitialState extends ToggleVideoState {
 }
 
 final class TogglingVideoState extends ToggleVideoState {
-  const TogglingVideoState();
+  const TogglingVideoState(
+    this.to,
+  );
+
+  final bool to;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        to,
+      ];
 }
 
 final class ToggledVideoState extends ToggleVideoState {
-  const ToggledVideoState();
+  const ToggledVideoState(
+    this.to,
+  );
+
+  final bool to;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        to,
+      ];
 }
 
 final class FailedToToggleVideoState extends ToggleVideoState {
-  const FailedToToggleVideoState(
-    this.failure,
-  );
+  const FailedToToggleVideoState({
+    required this.to,
+    required this.failure,
+  });
 
+  final bool to;
   final Failure failure;
 
   @override
   List<Object?> get props => [
+        to,
         failure,
       ];
 }

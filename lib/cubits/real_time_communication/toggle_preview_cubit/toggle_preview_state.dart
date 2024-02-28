@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, avoid_positional_boolean_parameters
 
 part of 'toggle_preview_cubit.dart';
 
@@ -14,28 +14,43 @@ final class TogglePreviewInitialState extends TogglePreviewState {
 }
 
 final class TogglingPreviewState extends TogglePreviewState {
-  const TogglingPreviewState();
+  const TogglingPreviewState(
+    this.to,
+  );
+
+  final bool to;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        to,
+      ];
 }
 
 final class ToggledPreviewState extends TogglePreviewState {
-  const ToggledPreviewState();
+  const ToggledPreviewState(
+    this.to,
+  );
+
+  final bool to;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        to,
+      ];
 }
 
 final class FailedToTogglePreviewState extends TogglePreviewState {
-  const FailedToTogglePreviewState(
-    this.failure,
-  );
+  const FailedToTogglePreviewState({
+    required this.to,
+    required this.failure,
+  });
 
+  final bool to;
   final Failure failure;
 
   @override
   List<Object?> get props => [
+        to,
         failure,
       ];
 }

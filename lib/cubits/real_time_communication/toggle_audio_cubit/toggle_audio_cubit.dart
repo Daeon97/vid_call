@@ -19,36 +19,47 @@ final class ToggleAudioCubit extends Cubit<ToggleAudioState> {
   final AudioOpsRepository _audioOpsRepository;
 
   Future<void> toggleAudio({
-    required bool enable,
+    required bool to,
   }) async {
     emit(
-      const TogglingAudioState(),
+      TogglingAudioState(
+        to,
+      ),
     );
 
-    final toggleAudioResult = await switch (enable) {
+    final toggleAudioResult = await switch (to) {
       true => _audioOpsRepository.enableAudio(),
       false => _audioOpsRepository.disableAudio(),
     };
 
     toggleAudioResult.fold(
-      _failure,
-      _success,
+      (failure) => _failure(
+        to: to,
+        failure: failure,
+      ),
+      (_) => _success(
+        to,
+      ),
     );
   }
 
-  void _failure(
-    Failure failure,
-  ) =>
+  void _failure({
+    required bool to,
+    required Failure failure,
+  }) =>
       emit(
         FailedToToggleAudioState(
-          failure,
+          to: to,
+          failure: failure,
         ),
       );
 
   void _success(
-    void _,
+    bool to,
   ) =>
       emit(
-        const ToggledAudioState(),
+        ToggledAudioState(
+          to,
+        ),
       );
 }
