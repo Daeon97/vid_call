@@ -1,13 +1,16 @@
 // ignore_for_file: public_member_api_docs
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vid_call/cubits/permission/camera_permission_handler_cubit/camera_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/microphone_permission_handler_cubit.dart';
 import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart';
-import 'package:vid_call/cubits/real_time_communication/create_video_view_cubit/create_video_view_cubit.dart';
+import 'package:vid_call/cubits/real_time_communication/create_local_video_view_cubit/create_local_video_view_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart';
+import 'package:vid_call/cubits/real_time_communication/join_channel_cubit/join_channel_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/toggle_audio_cubit/toggle_audio_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/toggle_preview_cubit/toggle_preview_cubit.dart';
 import 'package:vid_call/cubits/real_time_communication/toggle_video_cubit/toggle_video_cubit.dart';
@@ -16,8 +19,11 @@ import 'package:vid_call/resources/numbers/constants.dart'
     show oneDotFive, oneDotNil, sixteenDotNil, twoDotNil;
 import 'package:vid_call/resources/numbers/dimensions.dart'
     show largeSpacing, smallSpacing, spacing;
+import 'package:vid_call/resources/strings/routes.dart'
+    show videoCallScreenRoute;
 import 'package:vid_call/resources/strings/ui.dart'
     show cameraIsDisabled, join, request, settings;
+import 'package:vid_call/utils/enums.dart' show Role;
 import 'package:vid_call/views/widgets/alert_snack_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,9 +36,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _channelIdController;
 
+  late final int randomId;
+
   @override
   void initState() {
     _channelIdController = TextEditingController();
+
+    randomId = Random().nextInt(
+      724569,
+    );
 
     context.read<CameraPermissionHandlerCubit>().cameraPermissionStatus;
 
@@ -82,10 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
             listener: (_, initializeRealTimeCommunicationState) {
               if (initializeRealTimeCommunicationState
                   is InitializedRealTimeCommunicationState) {
-                context.read<CreateVideoViewCubit>().createVideoView(
-                      viewId: 0,
-                      userId: 0,
-                      onVideoViewCreated: (viewId) {},
+                context.read<CreateLocalVideoViewCubit>().createLocalVideoView(
+                      id: randomId,
                     );
               } else if (initializeRealTimeCommunicationState
                   is FailedToInitializeRealTimeCommunicationState) {
@@ -104,6 +114,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           (toggleVideoState is FailedToToggleVideoState &&
                               !toggleVideoState.to),
                     ),
+          ),
+          BlocListener<JoinChannelCubit, JoinChannelState>(
+            listener: (_, joinChannelState) {
+              if (joinChannelState is JoinedChannelState) {
+                Navigator.of(context).pushNamed(
+                  videoCallScreenRoute,
+                );
+              }
+            },
           ),
         ],
         child: Scaffold(
@@ -133,11 +152,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 toggleVideoState.to) ||
                             (toggleVideoState is FailedToToggleVideoState &&
                                 !toggleVideoState.to)) {
-                          true => BlocBuilder<CreateVideoViewCubit,
-                                CreateVideoViewState>(
-                              builder: (_, createVideoViewState) =>
-                                  switch (createVideoViewState) {
-                                CreatedVideoViewState(
+                          true => BlocBuilder<CreateLocalVideoViewCubit,
+                                CreateLocalVideoViewState>(
+                              builder: (_, createLocalVideoViewState) =>
+                                  switch (createLocalVideoViewState) {
+                                CreatedLocalVideoViewState(
                                   agoraVideoView: final agoraVideoView,
                                 ) =>
                                   agoraVideoView,
@@ -301,18 +320,32 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(
                         width: spacing,
                       ),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: const ButtonStyle(
-                          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                            EdgeInsetsDirectional.symmetric(
-                              vertical: spacing,
-                              horizontal: largeSpacing + spacing,
+                      BlocBuilder<CreateLocalVideoViewCubit,
+                          CreateLocalVideoViewState>(
+                        builder: (_, createLocalVideoViewState) =>
+                            ElevatedButton(
+                          onPressed: () =>
+                              context.read<JoinChannelCubit>().joinChannel(
+                                    userId: randomId,
+                                    role: Role.audience,
+                                  ),
+                          onLongPress: () =>
+                              context.read<JoinChannelCubit>().joinChannel(
+                                    userId: randomId,
+                                    role: Role.host,
+                                  ),
+                          style: const ButtonStyle(
+                            padding:
+                                MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                              EdgeInsetsDirectional.symmetric(
+                                vertical: spacing,
+                                horizontal: largeSpacing + spacing,
+                              ),
                             ),
                           ),
-                        ),
-                        child: const Text(
-                          join,
+                          child: const Text(
+                            join,
+                          ),
                         ),
                       ),
                     ],

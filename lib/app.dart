@@ -13,8 +13,7 @@ class App extends StatelessWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      MultiBlocProvider(
+  Widget build(BuildContext context) => MultiBlocProvider(
         providers: appBlocProviders,
         child: MaterialApp(
           home: const HomeScreen(),
@@ -27,10 +26,8 @@ class App extends StatelessWidget {
         ),
       );
 
-  Route _routes(RouteSettings settings) =>
-      MaterialPageRoute(
-        builder: (_) =>
-        switch (settings.name) {
+  Route _routes(RouteSettings settings) => MaterialPageRoute(
+        builder: (_) => switch (settings.name) {
           videoCallScreenRoute => const VideoCallScreen(),
           _ => const HomeScreen(),
         },

@@ -24,6 +24,10 @@ abstract interface class VideoOpsRepository
     required OnVideoViewCreatedCallback onVideoViewCreated,
   });
 
+  Future<Either<Failure, void>> registerEventHandler(
+    RtcEngineEventHandler eventHandler,
+  );
+
   Future<Either<Failure, void>> enableVideo();
 
   Future<Either<Failure, void>> disableVideo();
@@ -61,15 +65,21 @@ abstract mixin class _ChannelOpsRepository {
     required String token,
     required String channelId,
     required int userId,
-    required bool publishCameraFeed,
-    required bool publishMicrophoneFeed,
     required Role role,
+    bool? publishCameraFeed,
+    bool? publishMicrophoneFeed,
   });
 
   Future<Either<Failure, void>> leaveChannel();
 }
 
 abstract mixin class _RemoteVideoOpsRepository {
+  Future<Either<Failure, void>> bindRemoteVideoToCanvas(
+    VideoCanvas canvas,
+  );
+
+  Future<Either<Failure, void>> unbindRemoteVideoFromCanvas();
+
   Future<Either<Failure, void>> muteRemoteVideoStream(
     int userId,
   );
@@ -128,6 +138,17 @@ final class VideoOpsRepositoryImplementation
           useAndroidSurfaceView: true,
         ),
         onAgoraVideoViewCreated: onVideoViewCreated,
+      );
+
+  @override
+  Future<Either<Failure, void>> registerEventHandler(
+    RtcEngineEventHandler eventHandler,
+  ) =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () async => _rtcService.registerEventHandler(
+          eventHandler,
+        ),
+        failureHandler: Failure.new,
       );
 
   @override
@@ -228,9 +249,9 @@ final class VideoOpsRepositoryImplementation
     required String token,
     required String channelId,
     required int userId,
-    required bool publishCameraFeed,
-    required bool publishMicrophoneFeed,
     required Role role,
+    bool? publishCameraFeed,
+    bool? publishMicrophoneFeed,
   }) =>
       handleRtcOperation<Failure, void>(
         rtcOperationInitiator: () => _rtcService.joinChannel(
@@ -238,9 +259,9 @@ final class VideoOpsRepositoryImplementation
           channelId: channelId,
           uid: userId,
           options: ChannelMediaOptions(
-            publishCameraTrack: publishCameraFeed,
-            publishMicrophoneTrack: publishMicrophoneFeed,
-            enableAudioRecordingOrPlayout: publishMicrophoneFeed,
+            publishCameraTrack: publishCameraFeed ?? true,
+            publishMicrophoneTrack: publishMicrophoneFeed ?? true,
+            enableAudioRecordingOrPlayout: publishMicrophoneFeed ?? true,
             autoSubscribeAudio: true,
             autoSubscribeVideo: true,
             channelProfile: ChannelProfileType.channelProfileCloudGaming,
@@ -262,6 +283,26 @@ final class VideoOpsRepositoryImplementation
             stopMicrophoneRecording: true,
             stopAllEffect: true,
           ),
+        ),
+        failureHandler: Failure.new,
+      );
+
+  @override
+  Future<Either<Failure, void>> bindRemoteVideoToCanvas(
+    VideoCanvas canvas,
+  ) =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.setupRemoteVideo(
+          canvas,
+        ),
+        failureHandler: Failure.new,
+      );
+
+  @override
+  Future<Either<Failure, void>> unbindRemoteVideoFromCanvas() =>
+      handleRtcOperation<Failure, void>(
+        rtcOperationInitiator: () => _rtcService.setupRemoteVideo(
+          const VideoCanvas(),
         ),
         failureHandler: Failure.new,
       );

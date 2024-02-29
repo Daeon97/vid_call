@@ -8,10 +8,16 @@ import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/m
     show MicrophonePermissionHandlerCubit;
 import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart'
     show OpenPermissionSettingsCubit;
-import 'package:vid_call/cubits/real_time_communication/create_video_view_cubit/create_video_view_cubit.dart'
-    show CreateVideoViewCubit;
+import 'package:vid_call/cubits/real_time_communication/create_local_video_view_cubit/create_local_video_view_cubit.dart'
+    show CreateLocalVideoViewCubit;
+import 'package:vid_call/cubits/real_time_communication/create_remote_video_view_cubit/create_remote_video_view_cubit.dart'
+    show CreateRemoteVideoViewCubit;
 import 'package:vid_call/cubits/real_time_communication/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart'
     show InitializeRealTimeCommunicationCubit;
+import 'package:vid_call/cubits/real_time_communication/join_channel_cubit/join_channel_cubit.dart'
+    show JoinChannelCubit;
+import 'package:vid_call/cubits/real_time_communication/listen_remote_user_cubit/listen_remote_user_cubit.dart'
+    show ListenRemoteUserCubit;
 import 'package:vid_call/cubits/real_time_communication/toggle_audio_cubit/toggle_audio_cubit.dart'
     show ToggleAudioCubit;
 import 'package:vid_call/cubits/real_time_communication/toggle_preview_cubit/toggle_preview_cubit.dart'
@@ -47,8 +53,8 @@ void registerServices() {
         sl(),
       ),
     )
-    ..registerFactory<CreateVideoViewCubit>(
-      () => CreateVideoViewCubit(
+    ..registerFactory<CreateLocalVideoViewCubit>(
+      () => CreateLocalVideoViewCubit(
         sl(),
       ),
     )
@@ -64,6 +70,21 @@ void registerServices() {
     )
     ..registerFactory<ToggleVideoCubit>(
       () => ToggleVideoCubit(
+        sl(),
+      ),
+    )
+    ..registerFactory<CreateRemoteVideoViewCubit>(
+      () => CreateRemoteVideoViewCubit(
+        sl(),
+      ),
+    )
+    ..registerFactory<ListenRemoteUserCubit>(
+      () => ListenRemoteUserCubit(
+        sl(),
+      ),
+    )
+    ..registerFactory<JoinChannelCubit>(
+      () => JoinChannelCubit(
         sl(),
       ),
     )

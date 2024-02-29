@@ -14,3 +14,8 @@ const settings = 'Settings';
 const weCouldNotOpenAppSettings = 'We could not open app settings';
 const join = 'Join';
 const cameraIsDisabled = 'Camera is disabled';
+const userEndedTheCall = 'User ended the call';
+const userLeftTheCallDueToBadInternet =
+    'User left the call due to bad internet';
+const userSwitchedRole = 'User switched role';
+const someoneJoinedTheCall = ' joined the call';
