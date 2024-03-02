@@ -14,7 +14,7 @@ import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local
 import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local_video_cubit/toggle_local_video_cubit.dart';
 import 'package:vid_call/resources/colors.dart' show cameraPreviewSurfaceColor;
 import 'package:vid_call/resources/numbers/constants.dart'
-    show oneDotFive, twoDotNil;
+    show oneDotSix, oneDotTwo;
 import 'package:vid_call/resources/numbers/dimensions.dart'
     show largeSpacing, smallSpacing, spacing;
 import 'package:vid_call/resources/strings/routes.dart'
@@ -135,8 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     BlocBuilder<ToggleLocalVideoCubit, ToggleLocalVideoState>(
                       builder: (_, toggleLocalVideoState) => Container(
-                        height: MediaQuery.of(context).size.height / twoDotNil,
-                        width: MediaQuery.of(context).size.width / oneDotFive,
+                        height: MediaQuery.of(context).size.height / oneDotSix,
+                        width: MediaQuery.of(context).size.width / oneDotTwo,
                         decoration: BoxDecoration(
                           border: Border.all(),
                           color: switch ((toggleLocalVideoState

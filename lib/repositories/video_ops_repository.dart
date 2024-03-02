@@ -70,8 +70,6 @@ abstract final class RemoteVideoOpsRepository {
     required int viewId,
     required int userId,
     required String channelId,
-    required int windowWidth,
-    required int windowHeight,
   });
 
   Future<Either<Failure, void>> muteAllRemoteVideoStreams();
@@ -242,8 +240,6 @@ final class RemoteVideoOpsRepositoryImplementation
     required int viewId,
     required int userId,
     required String channelId,
-    required int windowWidth,
-    required int windowHeight,
   }) =>
       AgoraVideoView(
         controller: VideoViewController.remote(
@@ -252,10 +248,6 @@ final class RemoteVideoOpsRepositoryImplementation
             view: viewId,
             uid: userId,
             sourceType: VideoSourceType.videoSourceRemote,
-            cropArea: Rectangle(
-              width: windowWidth,
-              height: windowHeight,
-            ),
           ),
           connection: RtcConnection(
             channelId: channelId,

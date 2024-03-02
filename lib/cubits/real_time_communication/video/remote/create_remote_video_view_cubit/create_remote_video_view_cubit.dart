@@ -24,11 +24,9 @@ final class CreateRemoteVideoViewCubit
   final RtcEngine _rtcEngine;
   final RemoteVideoOpsRepository _remoteVideoOpsRepository;
 
-  void createRemoteVideoView({
-    required int remoteUserId,
-    required int windowWidth,
-    required int windowHeight,
-  }) =>
+  void createRemoteVideoView(
+    int remoteUserId,
+  ) =>
       emit(
         CreatedRemoteVideoViewState(
           _remoteVideoOpsRepository.createRemoteVideoView(
@@ -36,8 +34,6 @@ final class CreateRemoteVideoViewCubit
             viewId: remoteUserId,
             userId: remoteUserId,
             channelId: dotenv.env[testChannelId]!,
-            windowWidth: windowWidth,
-            windowHeight: windowHeight,
           ),
         ),
       );

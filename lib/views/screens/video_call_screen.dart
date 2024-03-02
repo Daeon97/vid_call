@@ -12,7 +12,7 @@ import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local
 import 'package:vid_call/cubits/real_time_communication/video/remote/create_remote_video_view_cubit/create_remote_video_view_cubit.dart';
 import 'package:vid_call/resources/colors.dart' show cameraPreviewSurfaceColor;
 import 'package:vid_call/resources/numbers/constants.dart'
-    show fiveDotNil, oneDotFive, threeDotNil, twoDotNil;
+    show fiveDotNil, nilDotEight, threeDotNil;
 import 'package:vid_call/resources/numbers/dimensions.dart'
     show largeSpacing, smallSpacing, spacing;
 import 'package:vid_call/resources/strings/ui.dart'
@@ -54,10 +54,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                   someoneJoinedTheCall,
             );
             context.read<CreateRemoteVideoViewCubit>().createRemoteVideoView(
-                  remoteUserId:
-                      listenRealTimeCommunicationEventState.remoteUserId,
-                  windowWidth: MediaQuery.of(context).size.width ~/ oneDotFive,
-                  windowHeight: MediaQuery.of(context).size.height ~/ twoDotNil,
+                  listenRealTimeCommunicationEventState.remoteUserId,
                 );
           } else if (listenRealTimeCommunicationEventState
               is RemoteUserLeftState) {
@@ -74,281 +71,286 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
           }
         },
         child: Scaffold(
-          body: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.all(
-                  spacing,
-                ),
-                child: Column(
-                  children: [
-                    BlocBuilder<CreateRemoteVideoViewCubit,
-                        CreateRemoteVideoViewState>(
-                      builder: (_, createRemoteVideoViewState) => Container(
-                        height: MediaQuery.of(context).size.height / twoDotNil,
-                        width: MediaQuery.of(context).size.width / oneDotFive,
-                        decoration: BoxDecoration(
-                          border: Border.all(),
-                          color: switch (createRemoteVideoViewState) {
-                            CreatedRemoteVideoViewState(
-                              agoraVideoView: _,
-                            ) =>
-                              null,
-                            _ => cameraPreviewSurfaceColor,
-                          },
+          body: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: [
+              BlocBuilder<CreateRemoteVideoViewCubit,
+                  CreateRemoteVideoViewState>(
+                builder: (_, createRemoteVideoViewState) => Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    color: switch (createRemoteVideoViewState) {
+                      CreatedRemoteVideoViewState(
+                        agoraVideoView: _,
+                      ) =>
+                        null,
+                      _ => cameraPreviewSurfaceColor.withOpacity(
+                          nilDotEight,
                         ),
-                        child: Center(
-                          child: switch (createRemoteVideoViewState) {
-                            CreatedRemoteVideoViewState(
-                              agoraVideoView: final agoraVideoView,
-                            ) =>
-                              agoraVideoView,
-                            _ => const CircularProgressIndicator(),
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: spacing,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        BlocBuilder<CameraPermissionHandlerCubit,
-                            CameraPermissionHandlerState>(
-                          builder: (_, cameraPermissionHandlerState) =>
-                              BlocBuilder<ToggleLocalVideoCubit,
-                                  ToggleLocalVideoState>(
-                            builder: (_, toggleLocalVideoState) =>
-                                ElevatedButton(
-                              onPressed: switch (cameraPermissionHandlerState) {
-                                CameraPermissionGrantedState()
-                                    when toggleLocalVideoState
-                                            is ToggleLocalVideoInitialState ||
-                                        toggleLocalVideoState
-                                            is ToggledLocalVideoState ||
-                                        toggleLocalVideoState
-                                            is FailedToToggleLocalVideoState =>
-                                  () => context
-                                      .read<ToggleLocalVideoCubit>()
-                                      .toggleLocalVideo(
-                                        to: toggleLocalVideoState
-                                                is ToggleLocalVideoInitialState ||
-                                            (toggleLocalVideoState
-                                                    is ToggledLocalVideoState &&
-                                                !toggleLocalVideoState.to) ||
-                                            (toggleLocalVideoState
-                                                    is FailedToToggleLocalVideoState &&
-                                                toggleLocalVideoState.to),
-                                      ),
-                                _ => null,
-                              },
-                              style: const ButtonStyle(
-                                shape: MaterialStatePropertyAll<OutlinedBorder>(
-                                  CircleBorder(),
-                                ),
-                                padding: MaterialStatePropertyAll<
-                                    EdgeInsetsGeometry>(
-                                  EdgeInsetsDirectional.all(
-                                    spacing,
-                                  ),
-                                ),
-                              ),
-                              child: FaIcon(
-                                switch (toggleLocalVideoState) {
-                                  ToggledLocalVideoState(
-                                    to: final to,
-                                  )
-                                      when to =>
-                                    FontAwesomeIcons.video,
-                                  FailedToToggleLocalVideoState(
-                                    to: final to,
-                                    failure: _,
-                                  )
-                                      when !to =>
-                                    FontAwesomeIcons.video,
-                                  _ => FontAwesomeIcons.videoSlash,
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: spacing,
-                        ),
-                        BlocBuilder<MicrophonePermissionHandlerCubit,
-                            MicrophonePermissionHandlerState>(
-                          builder: (_, microphonePermissionHandlerState) =>
-                              BlocBuilder<ToggleLocalAudioCubit,
-                                  ToggleLocalAudioState>(
-                            builder: (_, toggleLocalAudioState) =>
-                                ElevatedButton(
-                              onPressed: switch (
-                                  microphonePermissionHandlerState) {
-                                MicrophonePermissionGrantedState()
-                                    when toggleLocalAudioState
-                                            is ToggleLocalAudioInitialState ||
-                                        toggleLocalAudioState
-                                            is ToggledLocalAudioState ||
-                                        toggleLocalAudioState
-                                            is FailedToToggleLocalAudioState =>
-                                  () => context
-                                      .read<ToggleLocalAudioCubit>()
-                                      .toggleLocalAudio(
-                                        to: toggleLocalAudioState
-                                                is ToggleLocalAudioInitialState ||
-                                            (toggleLocalAudioState
-                                                    is ToggledLocalAudioState &&
-                                                !toggleLocalAudioState.to) ||
-                                            (toggleLocalAudioState
-                                                    is FailedToToggleLocalAudioState &&
-                                                toggleLocalAudioState.to),
-                                      ),
-                                _ => null,
-                              },
-                              style: const ButtonStyle(
-                                shape: MaterialStatePropertyAll<OutlinedBorder>(
-                                  CircleBorder(),
-                                ),
-                                padding: MaterialStatePropertyAll<
-                                    EdgeInsetsGeometry>(
-                                  EdgeInsetsDirectional.all(
-                                    spacing,
-                                  ),
-                                ),
-                              ),
-                              child: FaIcon(
-                                switch (toggleLocalAudioState) {
-                                  ToggledLocalAudioState(
-                                    to: final to,
-                                  )
-                                      when to =>
-                                    FontAwesomeIcons.microphone,
-                                  FailedToToggleLocalAudioState(
-                                    to: final to,
-                                    failure: _,
-                                  )
-                                      when !to =>
-                                    FontAwesomeIcons.microphone,
-                                  _ => FontAwesomeIcons.microphoneSlash,
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: spacing,
-                        ),
-                        BlocBuilder<CreateLocalVideoViewCubit,
-                            CreateLocalVideoViewState>(
-                          builder: (_, createLocalVideoViewState) =>
-                              ElevatedButton(
-                            onPressed: () {},
-                            // context.read<JoinChannelCubit>().joinChannel(
-                            //   userId: randomId,
-                            //   role: Role.audience,
-                            // ),
-                            style: const ButtonStyle(
-                              padding:
-                                  MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                                EdgeInsetsDirectional.symmetric(
-                                  vertical: spacing,
-                                  horizontal: largeSpacing + spacing,
-                                ),
-                              ),
-                            ),
-                            child: const Text(
-                              leave,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: largeSpacing,
-                    ),
-                    Align(
-                      alignment: AlignmentDirectional.bottomEnd,
-                      child: BlocBuilder<ToggleLocalVideoCubit,
-                          ToggleLocalVideoState>(
-                        builder: (_, toggleLocalVideoState) => Container(
-                          height:
-                              MediaQuery.of(context).size.height / fiveDotNil,
-                          width:
-                              MediaQuery.of(context).size.width / threeDotNil,
-                          decoration: BoxDecoration(
-                            border: Border.all(),
-                            color: switch ((toggleLocalVideoState
-                                        is ToggledLocalVideoState &&
-                                    toggleLocalVideoState.to) ||
-                                (toggleLocalVideoState
-                                        is FailedToToggleLocalVideoState &&
-                                    !toggleLocalVideoState.to)) {
-                              true => null,
-                              false => cameraPreviewSurfaceColor,
-                            },
-                          ),
-                          child: Center(
-                            child: switch ((toggleLocalVideoState
-                                        is ToggledLocalVideoState &&
-                                    toggleLocalVideoState.to) ||
-                                (toggleLocalVideoState
-                                        is FailedToToggleLocalVideoState &&
-                                    !toggleLocalVideoState.to)) {
-                              true => BlocBuilder<CreateLocalVideoViewCubit,
-                                    CreateLocalVideoViewState>(
-                                  builder: (_, createLocalVideoViewState) =>
-                                      switch (createLocalVideoViewState) {
-                                    CreatedLocalVideoViewState(
-                                      agoraVideoView: final agoraVideoView,
-                                    ) =>
-                                      agoraVideoView,
-                                    _ => const CircularProgressIndicator(),
-                                  },
-                                ),
-                              false => Padding(
-                                  padding: const EdgeInsets.all(
-                                    spacing,
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      FaIcon(
-                                        FontAwesomeIcons.videoSlash,
-                                        size: Theme.of(context)
-                                            .textTheme
-                                            .headlineLarge
-                                            ?.fontSize,
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                      ),
-                                      const SizedBox(
-                                        height: smallSpacing,
-                                      ),
-                                      Text(
-                                        videoMuted,
-                                        textAlign: TextAlign.center,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .scaffoldBackgroundColor,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    },
+                  ),
+                  child: Center(
+                    child: switch (createRemoteVideoViewState) {
+                      CreatedRemoteVideoViewState(
+                        agoraVideoView: final agoraVideoView,
+                      ) =>
+                        agoraVideoView,
+                      _ => const CircularProgressIndicator(),
+                    },
+                  ),
                 ),
               ),
-            ),
+              SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsetsDirectional.all(
+                    spacing,
+                  ),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        child: BlocBuilder<ToggleLocalVideoCubit,
+                            ToggleLocalVideoState>(
+                          builder: (_, toggleLocalVideoState) => Container(
+                            height:
+                                MediaQuery.of(context).size.height / fiveDotNil,
+                            width:
+                                MediaQuery.of(context).size.width / threeDotNil,
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              color: switch ((toggleLocalVideoState
+                                          is ToggledLocalVideoState &&
+                                      toggleLocalVideoState.to) ||
+                                  (toggleLocalVideoState
+                                          is FailedToToggleLocalVideoState &&
+                                      !toggleLocalVideoState.to)) {
+                                true => null,
+                                false => cameraPreviewSurfaceColor,
+                              },
+                            ),
+                            child: Center(
+                              child: switch ((toggleLocalVideoState
+                                          is ToggledLocalVideoState &&
+                                      toggleLocalVideoState.to) ||
+                                  (toggleLocalVideoState
+                                          is FailedToToggleLocalVideoState &&
+                                      !toggleLocalVideoState.to)) {
+                                true => BlocBuilder<CreateLocalVideoViewCubit,
+                                      CreateLocalVideoViewState>(
+                                    builder: (_, createLocalVideoViewState) =>
+                                        switch (createLocalVideoViewState) {
+                                      CreatedLocalVideoViewState(
+                                        agoraVideoView: final agoraVideoView,
+                                      ) =>
+                                        agoraVideoView,
+                                      _ => const CircularProgressIndicator(),
+                                    },
+                                  ),
+                                false => Padding(
+                                    padding: const EdgeInsets.all(
+                                      spacing,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        FaIcon(
+                                          FontAwesomeIcons.videoSlash,
+                                          size: Theme.of(context)
+                                              .textTheme
+                                              .headlineLarge
+                                              ?.fontSize,
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                        ),
+                                        const SizedBox(
+                                          height: smallSpacing,
+                                        ),
+                                        Text(
+                                          videoMuted,
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .scaffoldBackgroundColor,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: largeSpacing,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          BlocBuilder<CameraPermissionHandlerCubit,
+                              CameraPermissionHandlerState>(
+                            builder: (_, cameraPermissionHandlerState) =>
+                                BlocBuilder<ToggleLocalVideoCubit,
+                                    ToggleLocalVideoState>(
+                              builder: (_, toggleLocalVideoState) =>
+                                  ElevatedButton(
+                                onPressed: switch (
+                                    cameraPermissionHandlerState) {
+                                  CameraPermissionGrantedState()
+                                      when toggleLocalVideoState
+                                              is ToggleLocalVideoInitialState ||
+                                          toggleLocalVideoState
+                                              is ToggledLocalVideoState ||
+                                          toggleLocalVideoState
+                                              is FailedToToggleLocalVideoState =>
+                                    () => context
+                                        .read<ToggleLocalVideoCubit>()
+                                        .toggleLocalVideo(
+                                          to: toggleLocalVideoState
+                                                  is ToggleLocalVideoInitialState ||
+                                              (toggleLocalVideoState
+                                                      is ToggledLocalVideoState &&
+                                                  !toggleLocalVideoState.to) ||
+                                              (toggleLocalVideoState
+                                                      is FailedToToggleLocalVideoState &&
+                                                  toggleLocalVideoState.to),
+                                        ),
+                                  _ => null,
+                                },
+                                style: const ButtonStyle(
+                                  shape:
+                                      MaterialStatePropertyAll<OutlinedBorder>(
+                                    CircleBorder(),
+                                  ),
+                                  padding: MaterialStatePropertyAll<
+                                      EdgeInsetsGeometry>(
+                                    EdgeInsetsDirectional.all(
+                                      spacing,
+                                    ),
+                                  ),
+                                ),
+                                child: FaIcon(
+                                  switch (toggleLocalVideoState) {
+                                    ToggledLocalVideoState(
+                                      to: final to,
+                                    )
+                                        when to =>
+                                      FontAwesomeIcons.video,
+                                    FailedToToggleLocalVideoState(
+                                      to: final to,
+                                      failure: _,
+                                    )
+                                        when !to =>
+                                      FontAwesomeIcons.video,
+                                    _ => FontAwesomeIcons.videoSlash,
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: spacing,
+                          ),
+                          BlocBuilder<MicrophonePermissionHandlerCubit,
+                              MicrophonePermissionHandlerState>(
+                            builder: (_, microphonePermissionHandlerState) =>
+                                BlocBuilder<ToggleLocalAudioCubit,
+                                    ToggleLocalAudioState>(
+                              builder: (_, toggleLocalAudioState) =>
+                                  ElevatedButton(
+                                onPressed: switch (
+                                    microphonePermissionHandlerState) {
+                                  MicrophonePermissionGrantedState()
+                                      when toggleLocalAudioState
+                                              is ToggleLocalAudioInitialState ||
+                                          toggleLocalAudioState
+                                              is ToggledLocalAudioState ||
+                                          toggleLocalAudioState
+                                              is FailedToToggleLocalAudioState =>
+                                    () => context
+                                        .read<ToggleLocalAudioCubit>()
+                                        .toggleLocalAudio(
+                                          to: toggleLocalAudioState
+                                                  is ToggleLocalAudioInitialState ||
+                                              (toggleLocalAudioState
+                                                      is ToggledLocalAudioState &&
+                                                  !toggleLocalAudioState.to) ||
+                                              (toggleLocalAudioState
+                                                      is FailedToToggleLocalAudioState &&
+                                                  toggleLocalAudioState.to),
+                                        ),
+                                  _ => null,
+                                },
+                                style: const ButtonStyle(
+                                  shape:
+                                      MaterialStatePropertyAll<OutlinedBorder>(
+                                    CircleBorder(),
+                                  ),
+                                  padding: MaterialStatePropertyAll<
+                                      EdgeInsetsGeometry>(
+                                    EdgeInsetsDirectional.all(
+                                      spacing,
+                                    ),
+                                  ),
+                                ),
+                                child: FaIcon(
+                                  switch (toggleLocalAudioState) {
+                                    ToggledLocalAudioState(
+                                      to: final to,
+                                    )
+                                        when to =>
+                                      FontAwesomeIcons.microphone,
+                                    FailedToToggleLocalAudioState(
+                                      to: final to,
+                                      failure: _,
+                                    )
+                                        when !to =>
+                                      FontAwesomeIcons.microphone,
+                                    _ => FontAwesomeIcons.microphoneSlash,
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: spacing,
+                          ),
+                          BlocBuilder<CreateLocalVideoViewCubit,
+                              CreateLocalVideoViewState>(
+                            builder: (_, createLocalVideoViewState) =>
+                                ElevatedButton(
+                              onPressed: () {},
+                              // context.read<JoinChannelCubit>().joinChannel(
+                              //   userId: randomId,
+                              //   role: Role.audience,
+                              // ),
+                              style: const ButtonStyle(
+                                padding: MaterialStatePropertyAll<
+                                    EdgeInsetsGeometry>(
+                                  EdgeInsetsDirectional.symmetric(
+                                    vertical: spacing,
+                                    horizontal: largeSpacing + spacing,
+                                  ),
+                                ),
+                              ),
+                              child: const Text(
+                                leave,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       );
