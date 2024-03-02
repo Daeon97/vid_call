@@ -3,20 +3,20 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'package:vid_call/utils/enums.dart' as enums show PermissionStatus;
 
-abstract interface class _PermissionHandlerRepository {
+abstract final class _PermissionHandlerRepository {
   Future<void> requestPermission();
 
   Future<enums.PermissionStatus> get status;
 }
 
-abstract interface class PermissionHandlerSettingsRepository {
+abstract final class PermissionHandlerSettingsRepository {
   Future<bool> openSettings();
 }
 
-abstract interface class CameraPermissionHandlerRepository
+abstract final class CameraPermissionHandlerRepository
     implements _PermissionHandlerRepository {}
 
-abstract interface class MicrophonePermissionHandlerRepository
+abstract final class MicrophonePermissionHandlerRepository
     implements _PermissionHandlerRepository {}
 
 final class PermissionHandlerSettingsRepositoryImplementation

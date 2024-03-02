@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:vid_call/cubits/permission/camera_permission_handler_cubit/camera_permission_handler_cubit.dart'
     show CameraPermissionHandlerCubit;
@@ -8,25 +9,28 @@ import 'package:vid_call/cubits/permission/microphone_permission_handler_cubit/m
     show MicrophonePermissionHandlerCubit;
 import 'package:vid_call/cubits/permission/open_permission_settings_cubit/open_permission_settings_cubit.dart'
     show OpenPermissionSettingsCubit;
-import 'package:vid_call/cubits/real_time_communication/create_local_video_view_cubit/create_local_video_view_cubit.dart'
-    show CreateLocalVideoViewCubit;
-import 'package:vid_call/cubits/real_time_communication/create_remote_video_view_cubit/create_remote_video_view_cubit.dart'
-    show CreateRemoteVideoViewCubit;
-import 'package:vid_call/cubits/real_time_communication/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart'
-    show InitializeRealTimeCommunicationCubit;
-import 'package:vid_call/cubits/real_time_communication/join_channel_cubit/join_channel_cubit.dart'
+import 'package:vid_call/cubits/real_time_communication/audio/local/toggle_local_audio_cubit/toggle_local_audio_cubit.dart'
+    show ToggleLocalAudioCubit;
+import 'package:vid_call/cubits/real_time_communication/channel/join_channel_cubit/join_channel_cubit.dart'
     show JoinChannelCubit;
-import 'package:vid_call/cubits/real_time_communication/listen_remote_user_cubit/listen_remote_user_cubit.dart'
-    show ListenRemoteUserCubit;
-import 'package:vid_call/cubits/real_time_communication/toggle_audio_cubit/toggle_audio_cubit.dart'
-    show ToggleAudioCubit;
-import 'package:vid_call/cubits/real_time_communication/toggle_preview_cubit/toggle_preview_cubit.dart'
-    show TogglePreviewCubit;
-import 'package:vid_call/cubits/real_time_communication/toggle_video_cubit/toggle_video_cubit.dart'
-    show ToggleVideoCubit;
+import 'package:vid_call/cubits/real_time_communication/engine/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart'
+    show InitializeRealTimeCommunicationCubit;
+import 'package:vid_call/cubits/real_time_communication/engine/listen_real_time_communication_event_cubit/listen_real_time_communication_event_cubit.dart'
+    show ListenRealTimeCommunicationEventCubit;
+import 'package:vid_call/cubits/real_time_communication/video/local/create_local_video_view_cubit/create_local_video_view_cubit.dart'
+    show CreateLocalVideoViewCubit;
+import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local_preview_cubit/toggle_local_preview_cubit.dart'
+    show ToggleLocalPreviewCubit;
+import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local_video_cubit/toggle_local_video_cubit.dart'
+    show ToggleLocalVideoCubit;
+import 'package:vid_call/cubits/real_time_communication/video/remote/create_remote_video_view_cubit/create_remote_video_view_cubit.dart'
+    show CreateRemoteVideoViewCubit;
 import 'package:vid_call/repositories/audio_ops_repository.dart';
+import 'package:vid_call/repositories/channel_ops_repository.dart';
 import 'package:vid_call/repositories/permission_handler_repository.dart';
+import 'package:vid_call/repositories/rtc_engine_ops_repository.dart';
 import 'package:vid_call/repositories/video_ops_repository.dart';
+import 'package:vid_call/resources/strings/environment.dart';
 
 final sl = GetIt.I;
 
@@ -50,36 +54,41 @@ void registerServices() {
     )
     ..registerFactory<InitializeRealTimeCommunicationCubit>(
       () => InitializeRealTimeCommunicationCubit(
-        sl(),
+        appId: sl(
+          instanceName: appId,
+        ),
+        rtcEngineOpsRepository: sl(),
       ),
     )
     ..registerFactory<CreateLocalVideoViewCubit>(
       () => CreateLocalVideoViewCubit(
+        rtcEngine: sl(),
+        localVideoOpsRepository: sl(),
+      ),
+    )
+    ..registerFactory<ToggleLocalAudioCubit>(
+      () => ToggleLocalAudioCubit(
         sl(),
       ),
     )
-    ..registerFactory<ToggleAudioCubit>(
-      () => ToggleAudioCubit(
+    ..registerFactory<ToggleLocalPreviewCubit>(
+      () => ToggleLocalPreviewCubit(
         sl(),
       ),
     )
-    ..registerFactory<TogglePreviewCubit>(
-      () => TogglePreviewCubit(
-        sl(),
-      ),
-    )
-    ..registerFactory<ToggleVideoCubit>(
-      () => ToggleVideoCubit(
+    ..registerFactory<ToggleLocalVideoCubit>(
+      () => ToggleLocalVideoCubit(
         sl(),
       ),
     )
     ..registerFactory<CreateRemoteVideoViewCubit>(
       () => CreateRemoteVideoViewCubit(
-        sl(),
+        rtcEngine: sl(),
+        remoteVideoOpsRepository: sl(),
       ),
     )
-    ..registerFactory<ListenRemoteUserCubit>(
-      () => ListenRemoteUserCubit(
+    ..registerFactory<ListenRealTimeCommunicationEventCubit>(
+      () => ListenRealTimeCommunicationEventCubit(
         sl(),
       ),
     )
@@ -90,13 +99,33 @@ void registerServices() {
     )
 
     // Repositories
-    ..registerLazySingleton<VideoOpsRepository>(
-      () => VideoOpsRepositoryImplementation(
+    ..registerLazySingleton<RtcEngineOpsRepository>(
+      () => RtcEngineOpsRepositoryImplementation(
         sl(),
       ),
     )
-    ..registerLazySingleton<AudioOpsRepository>(
-      () => AudioOpsRepositoryImplementation(
+    ..registerLazySingleton<LocalVideoOpsRepository>(
+      () => LocalVideoOpsRepositoryImplementation(
+        sl(),
+      ),
+    )
+    ..registerLazySingleton<RemoteVideoOpsRepository>(
+      () => RemoteVideoOpsRepositoryImplementation(
+        sl(),
+      ),
+    )
+    ..registerLazySingleton<ChannelOpsRepository>(
+      () => ChannelOpsRepositoryImplementation(
+        sl(),
+      ),
+    )
+    ..registerLazySingleton<LocalAudioOpsRepository>(
+      () => LocalAudioOpsRepositoryImplementation(
+        sl(),
+      ),
+    )
+    ..registerLazySingleton<RemoteAudioOpsRepository>(
+      () => RemoteAudioOpsRepositoryImplementation(
         sl(),
       ),
     )
@@ -113,5 +142,11 @@ void registerServices() {
     // External
     ..registerLazySingleton<RtcEngine>(
       createAgoraRtcEngine,
+    )
+
+    // Primitives
+    ..registerLazySingleton<String>(
+      () => dotenv.env[appId]!,
+      instanceName: appId,
     );
 }

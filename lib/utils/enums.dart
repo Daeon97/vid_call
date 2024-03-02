@@ -5,8 +5,3 @@ enum PermissionStatus {
   notGranted,
   permanentlyDenied,
 }
-
-enum Role {
-  host,
-  audience,
-}

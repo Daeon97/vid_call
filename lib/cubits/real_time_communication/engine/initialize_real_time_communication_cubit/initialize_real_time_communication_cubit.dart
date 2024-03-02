@@ -2,32 +2,33 @@
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vid_call/models/failure.dart';
-import 'package:vid_call/repositories/video_ops_repository.dart'
-    show VideoOpsRepository;
-import 'package:vid_call/resources/strings/environment.dart' show appId;
+import 'package:vid_call/repositories/rtc_engine_ops_repository.dart'
+    show RtcEngineOpsRepository;
 
 part 'initialize_real_time_communication_state.dart';
 
 final class InitializeRealTimeCommunicationCubit
     extends Cubit<InitializeRealTimeCommunicationState> {
-  InitializeRealTimeCommunicationCubit(
-    VideoOpsRepository videoOpsRepository,
-  )   : _videoOpsRepository = videoOpsRepository,
+  InitializeRealTimeCommunicationCubit({
+    required String appId,
+    required RtcEngineOpsRepository rtcEngineOpsRepository,
+  })  : _appId = appId,
+        _rtcEngineOpsRepository = rtcEngineOpsRepository,
         super(
           const InitializeRealTimeCommunicationInitialState(),
         );
 
-  final VideoOpsRepository _videoOpsRepository;
+  final String _appId;
+  final RtcEngineOpsRepository _rtcEngineOpsRepository;
 
   Future<void> initializeRealTimeCommunication() async {
     emit(
       const InitializingRealTimeCommunicationState(),
     );
 
-    final initializationResult = await _videoOpsRepository.initialize(
-      dotenv.env[appId]!,
+    final initializationResult = await _rtcEngineOpsRepository.initialize(
+      _appId,
     );
 
     initializationResult.fold(

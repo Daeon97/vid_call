@@ -1,14 +1,14 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:dartz/dartz.dart';
-import 'package:vid_call/resources/strings/ui.dart' show theOperationFailed;
+import 'package:vid_call/models/failure.dart';
 import 'package:vid_call/utils/type_definitions.dart'
-    show FailureHandlerCallback, RtcOperationInitiatorCallback;
+    show RtcOperationInitiatorCallback;
 
 mixin class RtcOperationHandler {
-  Future<Either<L, R>> handleRtcOperation<L, R>({
+  Future<Either<Failure, R>> handleRtcOperation<R>({
     required RtcOperationInitiatorCallback<R> rtcOperationInitiator,
-    required FailureHandlerCallback<L> failureHandler,
+    required String failureMessage,
   }) async {
     try {
       final rtcOperation = await rtcOperationInitiator();
@@ -18,8 +18,8 @@ mixin class RtcOperationHandler {
       );
     } catch (error) {
       return Left(
-        failureHandler(
-          theOperationFailed,
+        Failure(
+          failureMessage,
         ),
       );
     }
