@@ -31,31 +31,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final TextEditingController _channelIdController;
-
-  late final int randomId;
-
   @override
   void initState() {
-    _channelIdController = TextEditingController();
-
-    randomId = 0;
-    // = Random().nextInt(
-    //   724569,
-    // );
-
     context.read<CameraPermissionHandlerCubit>().cameraPermissionStatus;
 
     context.read<MicrophonePermissionHandlerCubit>().microphonePermissionStatus;
 
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _channelIdController.dispose();
-
-    super.dispose();
   }
 
   Future<void> _openAppSettings() =>
@@ -92,9 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
             listener: (_, initializeRealTimeCommunicationState) {
               if (initializeRealTimeCommunicationState
                   is InitializedRealTimeCommunicationState) {
-                context.read<CreateLocalVideoViewCubit>().createLocalVideoView(
-                      id: randomId,
-                    );
+                context
+                    .read<CreateLocalVideoViewCubit>()
+                    .createLocalVideoView();
               } else if (initializeRealTimeCommunicationState
                   is FailedToInitializeRealTimeCommunicationState) {
                 AlertSnackBar.show(
@@ -336,25 +318,34 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(
                           width: spacing,
                         ),
-                        BlocBuilder<CreateLocalVideoViewCubit,
-                            CreateLocalVideoViewState>(
-                          builder: (_, createLocalVideoViewState) =>
-                              ElevatedButton(
-                            onPressed: () =>
-                                context.read<JoinChannelCubit>().joinChannel(
-                                      userId: randomId,
-                                    ),
-                            style: const ButtonStyle(
-                              padding:
-                                  MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                                EdgeInsetsDirectional.symmetric(
-                                  vertical: spacing,
-                                  horizontal: largeSpacing + spacing,
+                        BlocBuilder<CameraPermissionHandlerCubit,
+                            CameraPermissionHandlerState>(
+                          builder: (_, cameraPermissionHandlerState) =>
+                              BlocBuilder<MicrophonePermissionHandlerCubit,
+                                  MicrophonePermissionHandlerState>(
+                            builder: (_, microphonePermissionHandlerState) =>
+                                ElevatedButton(
+                              onPressed: switch (cameraPermissionHandlerState
+                                      is CameraPermissionGrantedState &&
+                                  microphonePermissionHandlerState
+                                      is MicrophonePermissionGrantedState) {
+                                true => () => context
+                                    .read<JoinChannelCubit>()
+                                    .joinChannel(),
+                                false => null,
+                              },
+                              style: const ButtonStyle(
+                                padding: MaterialStatePropertyAll<
+                                    EdgeInsetsGeometry>(
+                                  EdgeInsetsDirectional.symmetric(
+                                    vertical: spacing,
+                                    horizontal: largeSpacing + spacing,
+                                  ),
                                 ),
                               ),
-                            ),
-                            child: const Text(
-                              join,
+                              child: const Text(
+                                join,
+                              ),
                             ),
                           ),
                         ),

@@ -7,3 +7,5 @@ const sixteenDotNil = 16.0;
 const oneDotNil = 1.0;
 const fiveDotNil = 5.0;
 const threeDotNil = 3.0;
+
+const nil = 0;
