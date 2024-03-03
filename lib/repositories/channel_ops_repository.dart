@@ -45,6 +45,7 @@ final class ChannelOpsRepositoryImplementation
             autoSubscribeVideo: true,
             channelProfile: ChannelProfileType.channelProfileCommunication,
             clientRoleType: ClientRoleType.clientRoleBroadcaster,
+            defaultVideoStreamType: VideoStreamType.videoStreamHigh,
           ),
         ),
         failureMessage: failedToJoinChannel,

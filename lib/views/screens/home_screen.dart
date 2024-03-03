@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BlocListener<JoinChannelCubit, JoinChannelState>(
             listener: (_, joinChannelState) {
               if (joinChannelState is JoinedChannelState) {
-                Navigator.of(context).pushNamed(
+                Navigator.of(context).pushReplacementNamed(
                   videoCallScreenRoute,
                 );
               }

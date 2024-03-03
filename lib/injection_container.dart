@@ -13,10 +13,12 @@ import 'package:vid_call/cubits/real_time_communication/audio/local/toggle_local
     show ToggleLocalAudioCubit;
 import 'package:vid_call/cubits/real_time_communication/channel/join_channel_cubit/join_channel_cubit.dart'
     show JoinChannelCubit;
+import 'package:vid_call/cubits/real_time_communication/channel/leave_channel_cubit/leave_channel_cubit.dart'
+    show LeaveChannelCubit;
 import 'package:vid_call/cubits/real_time_communication/engine/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart'
     show InitializeRealTimeCommunicationCubit;
-import 'package:vid_call/cubits/real_time_communication/engine/listen_real_time_communication_event_cubit/listen_real_time_communication_event_cubit.dart'
-    show ListenRealTimeCommunicationEventCubit;
+import 'package:vid_call/cubits/real_time_communication/engine/real_time_communication_event_cubit/real_time_communication_event_cubit.dart'
+    show RealTimeCommunicationEventCubit;
 import 'package:vid_call/cubits/real_time_communication/video/local/create_local_video_view_cubit/create_local_video_view_cubit.dart'
     show CreateLocalVideoViewCubit;
 import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local_preview_cubit/toggle_local_preview_cubit.dart'
@@ -30,7 +32,7 @@ import 'package:vid_call/repositories/channel_ops_repository.dart';
 import 'package:vid_call/repositories/permission_handler_repository.dart';
 import 'package:vid_call/repositories/rtc_engine_ops_repository.dart';
 import 'package:vid_call/repositories/video_ops_repository.dart';
-import 'package:vid_call/resources/strings/environment.dart';
+import 'package:vid_call/resources/strings/environment.dart' show appId;
 
 final sl = GetIt.I;
 
@@ -87,13 +89,18 @@ void registerServices() {
         remoteVideoOpsRepository: sl(),
       ),
     )
-    ..registerFactory<ListenRealTimeCommunicationEventCubit>(
-      () => ListenRealTimeCommunicationEventCubit(
+    ..registerFactory<RealTimeCommunicationEventCubit>(
+      () => RealTimeCommunicationEventCubit(
         sl(),
       ),
     )
     ..registerFactory<JoinChannelCubit>(
       () => JoinChannelCubit(
+        sl(),
+      ),
+    )
+    ..registerFactory<LeaveChannelCubit>(
+      () => LeaveChannelCubit(
         sl(),
       ),
     )
@@ -110,9 +117,7 @@ void registerServices() {
       ),
     )
     ..registerLazySingleton<RemoteVideoOpsRepository>(
-      () => RemoteVideoOpsRepositoryImplementation(
-        sl(),
-      ),
+      RemoteVideoOpsRepositoryImplementation.new,
     )
     ..registerLazySingleton<ChannelOpsRepository>(
       () => ChannelOpsRepositoryImplementation(
@@ -121,11 +126,6 @@ void registerServices() {
     )
     ..registerLazySingleton<LocalAudioOpsRepository>(
       () => LocalAudioOpsRepositoryImplementation(
-        sl(),
-      ),
-    )
-    ..registerLazySingleton<RemoteAudioOpsRepository>(
-      () => RemoteAudioOpsRepositoryImplementation(
         sl(),
       ),
     )

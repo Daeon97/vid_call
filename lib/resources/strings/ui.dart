@@ -22,35 +22,16 @@ const someoneJoinedTheCall = ' joined the call';
 const channelJoinedSuccessfully = 'Channel joined successfully';
 const videoMuted = 'Video muted';
 const audioMuted = 'Audio muted';
-const failedToBindLocalVideoToView = 'Failed to bind local video to view';
-const failedToUnbindLocalVideoFromView =
-    'Failed to unbind local video from view';
 const failedToEnableLocalVideo = 'Failed to enable local video';
 const failedToDisableLocalVideo = 'Failed to disable local video';
-const failedToMuteLocalVideoStream = 'Failed to mute local video stream';
-const failedToUnMuteLocalVideoStream = 'Failed to un-mute local video stream';
 const failedToStartLocalVideoPreview = 'Failed to start local video preview';
 const failedToStopLocalVideoPreview = 'Failed to stop local video preview';
-const failedToBindRemoteVideoToCanvas = 'Failed to bind remote video to canvas';
-const failedToUnbindRemoteVideoFromCanvas =
-    'Failed to unbind remote video from canvas';
-const failedToMuteRemoteVideoStream = 'Failed to mute remote video stream';
-const failedToUnMuteRemoteVideoStream = 'Failed to un-mute remote video stream';
-const failedToMuteAllRemoteVideoStreams =
-    'Failed to mute all remote video streams';
-const failedToUnMuteAllRemoteVideoStreams =
-    'Failed to un-mute all remote video streams';
 const failedToEnableLocalAudio = 'Failed to enable local audio';
 const failedToDisableLocalAudio = 'Failed to disable local audio';
-const failedToMuteLocalAudioStream = 'Failed to mute local audio stream';
-const failedToUnMuteLocalAudioStream = 'Failed to un-mute local audio stream';
-const failedToMuteRemoteAudioStream = 'Failed to mute remote audio stream';
-const failedToUnMuteRemoteAudioStream = 'Failed to un-mute remote audio stream';
-const failedToMuteAllRemoteAudioStreams =
-    'Failed to mute all remote audio streams';
-const failedToUnMuteAllRemoteAudioStreams =
-    'Failed to un-mute all remote audio streams';
 const failedToJoinChannel = 'Failed to join channel';
 const failedToLeaveChannel = 'Failed to leave channel';
 const failedToInitializeRtcEngine = 'Failed to initialize RTC engine';
 const failedToRegisterEventHandler = 'Failed to register event handler';
+const failedToUnregisterEventHandler = 'Failed to unregister event handler';
+const noEventHandlerToUnregister = 'There is no event handler to unregister';
+const thereIsNoOneHere = 'There is no one here';

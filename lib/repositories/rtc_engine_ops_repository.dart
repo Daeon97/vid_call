@@ -4,7 +4,10 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:dartz/dartz.dart';
 import 'package:vid_call/models/failure.dart';
 import 'package:vid_call/resources/strings/ui.dart'
-    show failedToInitializeRtcEngine, failedToRegisterEventHandler;
+    show
+        failedToInitializeRtcEngine,
+        failedToRegisterEventHandler,
+        failedToUnregisterEventHandler;
 import 'package:vid_call/utils/clients/rtc_operation_handler.dart';
 
 abstract final class RtcEngineOpsRepository {
@@ -13,6 +16,10 @@ abstract final class RtcEngineOpsRepository {
   );
 
   Future<Either<Failure, void>> registerEventHandler(
+    RtcEngineEventHandler eventHandler,
+  );
+
+  Future<Either<Failure, void>> unregisterEventHandler(
     RtcEngineEventHandler eventHandler,
   );
 }
@@ -49,5 +56,16 @@ final class RtcEngineOpsRepositoryImplementation
           eventHandler,
         ),
         failureMessage: failedToRegisterEventHandler,
+      );
+
+  @override
+  Future<Either<Failure, void>> unregisterEventHandler(
+    RtcEngineEventHandler eventHandler,
+  ) =>
+      handleRtcOperation<void>(
+        rtcOperationInitiator: () async => _rtcService.unregisterEventHandler(
+          eventHandler,
+        ),
+        failureMessage: failedToUnregisterEventHandler,
       );
 }

@@ -11,10 +11,12 @@ import 'package:vid_call/cubits/real_time_communication/audio/local/toggle_local
     show ToggleLocalAudioCubit;
 import 'package:vid_call/cubits/real_time_communication/channel/join_channel_cubit/join_channel_cubit.dart'
     show JoinChannelCubit;
+import 'package:vid_call/cubits/real_time_communication/channel/leave_channel_cubit/leave_channel_cubit.dart'
+    show LeaveChannelCubit;
 import 'package:vid_call/cubits/real_time_communication/engine/initialize_real_time_communication_cubit/initialize_real_time_communication_cubit.dart'
     show InitializeRealTimeCommunicationCubit;
-import 'package:vid_call/cubits/real_time_communication/engine/listen_real_time_communication_event_cubit/listen_real_time_communication_event_cubit.dart'
-    show ListenRealTimeCommunicationEventCubit;
+import 'package:vid_call/cubits/real_time_communication/engine/real_time_communication_event_cubit/real_time_communication_event_cubit.dart'
+    show RealTimeCommunicationEventCubit;
 import 'package:vid_call/cubits/real_time_communication/video/local/create_local_video_view_cubit/create_local_video_view_cubit.dart'
     show CreateLocalVideoViewCubit;
 import 'package:vid_call/cubits/real_time_communication/video/local/toggle_local_preview_cubit/toggle_local_preview_cubit.dart'
@@ -53,10 +55,13 @@ List<BlocProvider> get appBlocProviders => [
       BlocProvider<CreateRemoteVideoViewCubit>(
         create: (_) => sl(),
       ),
-      BlocProvider<ListenRealTimeCommunicationEventCubit>(
+      BlocProvider<RealTimeCommunicationEventCubit>(
         create: (_) => sl(),
       ),
       BlocProvider<JoinChannelCubit>(
+        create: (_) => sl(),
+      ),
+      BlocProvider<LeaveChannelCubit>(
         create: (_) => sl(),
       ),
     ];
